@@ -22,21 +22,25 @@ Route::post('/storage/submit', [StorageController::class, 'submit'])->name('stor
 // ▼ ログイン必須
 Route::middleware('auth')->group(function () {
 
-    // プロフィール表示
-    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])
-        ->middleware('auth')
-        ->name('profile.edit');
+    // プロフィール
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    // プロフィール更新
-    Route::patch('/profile', [App\Http\Controllers\ProfileController::class, 'update'])
-        ->middleware('auth')
-        ->name('profile.update');
+    // お気に入り一覧
+    Route::get('/favorites', [FavoriteController::class, 'index'])
+        ->name('favorites')
+        ->middleware('auth');
 
-    // お気に入り
-    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites');
-    Route::post('/favorites/add/{id}', [FavoriteController::class, 'add'])->name('favorites.add');
+    // トグル
+    Route::post('/favorites/toggle/{id}', [FavoriteController::class, 'toggle'])
+        ->name('favorite.toggle')
+        ->middleware('auth');
 
-    // カート
+
+    // ▼ カート一覧
     Route::get('/cart', [CartController::class, 'index'])->name('cart');
-    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+
+    // ▼ カート追加
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])
+        ->name('cart.add');
 });

@@ -29,9 +29,9 @@ class User extends Authenticatable
         ];
     }
 
-    /* ▼▼ これを追加 ▼▼ */
     public function favorites()
-    {
-        return $this->hasMany(Favorite::class);
-    }
+{
+    return $this->hasMany(\App\Models\Favorite::class);
+}
+
 }
