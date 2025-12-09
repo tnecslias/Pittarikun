@@ -93,21 +93,35 @@
         </a>
     @endauth
 
-    {{-- カートに追加 --}}
-    @auth
-        <form method="POST" action="{{ route('cart.add', $s->id) }}">
-            @csrf
-            <button type="submit"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg transition">
-                カートに追加
-            </button>
-        </form>
-    @else
+{{-- カートに追加 --}}
+@auth
+    <form method="POST" action="{{ route('cart.add', $s->id) }}" class="space-y-2">
+        @csrf
+
+        {{-- ▼ 数量選択（ラベル付き） --}}
+        <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-700 whitespace-nowrap">数量</label>
+            <select name="quantity"
+                class="border rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-400 w-full">
+                @for ($i = 1; $i <= 10; $i++)
+                    <option value="{{ $i }}">{{ $i }}</option>
+                @endfor
+            </select>
+        </div>
+
+        <button type="submit"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg transition">
+            カートに追加
+        </button>
+    </form>
+@else
+
         <a href="{{ route('login') }}"
             class="w-full block text-center bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg transition">
             カートに追加
         </a>
     @endauth
+
 
 </div>
 

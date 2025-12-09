@@ -8,13 +8,12 @@
         カート
     </h2>
 
-    {{-- ▼ カード表示（お気に入りと合わせる） --}}
     <div class="mt-4 grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
 
         @forelse($cart_items as $item)
 
             @php
-                $s = $item->storage; // ストレージ情報
+                $s = $item->storage;
             @endphp
 
             @continue(!$s)
@@ -28,7 +27,7 @@
                          class="object-cover w-full h-full">
                 </div>
 
-                {{-- 名前 --}}
+                {{-- 商品名 --}}
                 <h3 class="mt-3 text-sm font-bold text-gray-800 text-center">
                     {{ $s->name }}
                 </h3>
@@ -38,25 +37,41 @@
                     ¥{{ number_format($s->price) }}
                 </p>
 
-                {{-- 数量 --}}
-                <p class="text-gray-800 text-sm font-semibold mt-1">
-                    数量：{{ $item->quantity }}
-                </p>
+                {{-- ▼ 数量変更（＋ / −） --}}
+                <div class="flex items-center justify-center mt-3 gap-2">
 
-                {{-- ▼ シンプルデザインのボタン（お気に入りと同じ） --}}
-                <div class="mt-3 w-full">
-
-                    {{-- 削除する --}}
-                    <form method="POST" action="{{ route('cart.remove', $s->id) }}" class="w-full">
+                    {{-- 数量 -1 --}}
+                    <form method="POST" action="{{ route('cart.decrease', $s->id) }}">
                         @csrf
-                        @method('DELETE')
                         <button type="submit"
-                                class="w-full bg-red-500 hover:bg-red-600 text-white text-sm py-1.5 rounded">
-                            削除する
+                            class="px-2 py-1 bg-gray-300 hover:bg-gray-400 rounded text-sm font-bold">
+                            −
                         </button>
                     </form>
 
+                    <span class="text-sm font-semibold w-6 text-center">
+                        {{ $item->quantity }}
+                    </span>
+
+                    {{-- 数量 +1 --}}
+                    <form method="POST" action="{{ route('cart.increase', $s->id) }}">
+                        @csrf
+                        <button type="submit"
+                            class="px-2 py-1 bg-gray-300 hover:bg-gray-400 rounded text-sm font-bold">
+                            ＋
+                        </button>
+                    </form>
                 </div>
+
+                {{-- 削除 --}}
+                <form method="POST" action="{{ route('cart.remove', $s->id) }}" class="mt-3 w-full">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="w-full bg-red-500 hover:bg-red-600 text-white text-sm py-1.5 rounded">
+                        削除する
+                    </button>
+                </form>
 
             </div>
 
