@@ -40,7 +40,13 @@ Route::middleware('auth')->group(function () {
     // ▼ カート一覧
     Route::get('/cart', [CartController::class, 'index'])->name('cart');
 
-    // ▼ カート追加
-    Route::post('/cart/add/{id}', [CartController::class, 'add'])
-        ->name('cart.add');
+    Route::middleware('auth')->group(function () {
+
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+
+    Route::post('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
+
+});
 });
