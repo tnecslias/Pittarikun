@@ -46,7 +46,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
 
-    Route::post('/cart/delete/{id}', [CartController::class, 'delete'])->name('cart.delete');
+    // カート削除
+    Route::delete('/cart/{id}', [App\Http\Controllers\CartController::class, 'remove'])
+        ->name('cart.remove');
 
 });
 });

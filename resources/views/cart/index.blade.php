@@ -8,55 +8,55 @@
         カート
     </h2>
 
-
-    {{-- 成功メッセージ --}}
-    @if(session('success'))
-        <div class="bg-green-100 text-green-800 p-3 mb-4 rounded shadow">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <div class="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 w-full max-w-4xl">
+    {{-- ▼ カード表示（お気に入りと合わせる） --}}
+    <div class="mt-4 grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
 
         @forelse($cart_items as $item)
 
-            {{-- 商品情報 --}}
             @php
-                $storage = $item->storage;  // ← リレーションで取得
+                $s = $item->storage; // ストレージ情報
             @endphp
+
+            @continue(!$s)
 
             <div class="bg-white rounded-xl shadow hover:shadow-xl transition p-4 flex flex-col items-center">
 
                 {{-- 正方形画像 --}}
                 <div class="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                    <img src="{{ asset('storage/'.$storage->image) }}"
-                         alt="{{ $storage->name }}"
+                    <img src="{{ asset('storage/'.$s->image) }}"
+                         alt="{{ $s->name }}"
                          class="object-cover w-full h-full">
                 </div>
 
                 {{-- 名前 --}}
                 <h3 class="mt-3 text-sm font-bold text-gray-800 text-center">
-                    {{ $storage->name }}
+                    {{ $s->name }}
                 </h3>
 
-                {{-- 値段 & 個数 --}}
+                {{-- 値段 --}}
                 <p class="text-gray-600 text-xs text-center">
-                    ¥{{ number_format($storage->price) }}
+                    ¥{{ number_format($s->price) }}
                 </p>
-                <p class="text-gray-800 text-sm font-semibold">
+
+                {{-- 数量 --}}
+                <p class="text-gray-800 text-sm font-semibold mt-1">
                     数量：{{ $item->quantity }}
                 </p>
 
-                {{-- 削除ボタン --}}
-                <form method="POST" action="{{ route('cart.remove', $storage->id) }}" class="mt-3 w-full">
-                    @csrf
-                    @method('DELETE')
+                {{-- ▼ シンプルデザインのボタン（お気に入りと同じ） --}}
+                <div class="mt-3 w-full">
 
-                    <button type="submit"
-                        class="w-full bg-red-500 hover:bg-red-600 text-white text-sm py-1 rounded-lg shadow">
-                        削除
-                    </button>
-                </form>
+                    {{-- 削除する --}}
+                    <form method="POST" action="{{ route('cart.remove', $s->id) }}" class="w-full">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                                class="w-full bg-red-500 hover:bg-red-600 text-white text-sm py-1.5 rounded">
+                            削除する
+                        </button>
+                    </form>
+
+                </div>
 
             </div>
 

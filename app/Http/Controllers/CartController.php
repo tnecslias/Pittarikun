@@ -49,7 +49,7 @@ class CartController extends Controller
             ]);
         }
 
-        return back()->with('success', 'カートに追加しました！');
+        return back()->with('success', 'カートに追加しました');
     }
 
     /**

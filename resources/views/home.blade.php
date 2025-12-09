@@ -13,12 +13,6 @@
     {{-- ========= ① 入力フォーム（白い枠） ========= --}}
     <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8">
 
-        @if(session('success'))
-            <div class="bg-green-100 text-green-800 p-3 mb-4 rounded shadow">
-                {{ session('success') }}
-            </div>
-        @endif
-
         {{-- 検索フォーム --}}
         <form method="GET" action="{{ route('storage.search') }}" class="space-y-4">
             <div>
@@ -49,9 +43,6 @@
 
     {{-- ここから下に検索結果を出す --}}
 
-
-    {{-- ========= ② 検索結果カード（正方形） ========= --}}
-    {{-- ========= ② 検索結果カード（正方形） ========= --}}
 @isset($storages)
 
     <div class="mt-20 grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
@@ -84,36 +75,42 @@
                     ¥{{ number_format($s->price) }}
                 </p>
 
-                {{-- ▼ いいね & カート ボタン --}}
-                <div class="mt-3 flex justify-between w-full">
+                <div class="mt-3 space-y-2 w-full">
 
-                    {{-- いいねボタン --}}
-                    @auth
-                        <form method="POST" action="{{ route('favorite.toggle', $s->id) }}">
-                            @csrf
-                            <button type="submit" class="favorite-btn">
-                                ❤️
-                            </button>
-                        </form>
+    {{-- お気に入りボタン --}}
+    @auth
+        <form method="POST" action="{{ route('favorite.toggle', $s->id) }}">
+            @csrf
+            <button type="submit"
+                class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-1.5 rounded-lg transition">
+                お気に入り
+            </button>
+        </form>
+    @else
+        <a href="{{ route('login') }}"
+            class="w-full block text-center bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-1.5 rounded-lg transition">
+            お気に入り
+        </a>
+    @endauth
 
-                    @else
-                        <a href="{{ route('login') }}" class="favorite-btn">
-                            ❤️
-                        </a>
-                    @endauth
+    {{-- カートに追加 --}}
+    @auth
+        <form method="POST" action="{{ route('cart.add', $s->id) }}">
+            @csrf
+            <button type="submit"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg transition">
+                カートに追加
+            </button>
+        </form>
+    @else
+        <a href="{{ route('login') }}"
+            class="w-full block text-center bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg transition">
+            カートに追加
+        </a>
+    @endauth
 
+</div>
 
-                    {{-- カートボタン --}}
-                    @auth
-                        <form method="POST" action="{{ route('cart.add', $s->id) }}">
-                            @csrf
-                            <button type="submit" class="cart-btn">🛒</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="cart-btn">🛒</a>
-                    @endauth
-
-                </div>
 
             </div>
 

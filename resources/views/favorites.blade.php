@@ -14,18 +14,11 @@
 
         @forelse($favorites as $fav)
 
-            {{-- ★ Favorite → Storage を取得 --}}
             @php
                 $s = $fav->storage; 
             @endphp
 
-            {{-- storage が存在しなければスキップ --}}
             @continue(!$s)
-
-            {{-- ★ isFavorited（常に true）--}}
-            @php
-                $isFavorited = true;
-            @endphp
 
             <div class="bg-white rounded-xl shadow hover:shadow-xl transition p-4 flex flex-col items-center">
 
@@ -44,23 +37,26 @@
                     ¥{{ number_format($s->price) }}
                 </p>
 
-                {{-- ▼ いいね & カート --}}
-                <div class="mt-3 flex justify-between w-full">
+                {{-- ▼ シンプルデザインの2ボタン --}}
+                <div class="mt-3 flex gap-2 w-full">
 
-                    {{-- ❤️ お気に入り解除 --}}
-                    <form method="POST" action="{{ route('favorite.toggle', $s->id) }}">
+                    {{-- 削除する --}}
+                    <form method="POST" action="{{ route('favorite.toggle', $s->id) }}" class="w-1/2">
                         @csrf
-                        <button type="submit" class="favorite-btn text-xl">
-                            🗑️
+                        <button type="submit"
+                                class="w-full bg-red-500 hover:bg-red-600 text-white text-sm py-1.5 rounded">
+                            削除する
                         </button>
                     </form>
 
-                    {{-- 🛒 カート --}}
-                    <form method="POST" action="{{ route('cart.add', $s->id) }}">
+                    {{-- カートに追加 --}}
+                    <form method="POST" action="{{ route('cart.add', $s->id) }}" class="w-1/2">
                         @csrf
-                        <button type="submit" class="cart-btn">🛒</button>
+                        <button type="submit"
+                                class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded">
+                            カートに追加
+                        </button>
                     </form>
-
                 </div>
 
             </div>
