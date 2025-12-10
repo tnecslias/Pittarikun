@@ -2,7 +2,7 @@
 @section('title', 'カート')
 
 @section('content')
-<div class="flex flex-col justify-center items-center bg-gray-50">
+<div class="flex flex-col justify-center items-center bg-gray-50 py-6">
 
     <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">
         カート
@@ -18,33 +18,35 @@
 
             @continue(!$s)
 
-            <div class="bg-white rounded-xl shadow hover:shadow-xl transition p-4 flex flex-col items-center">
+            <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition p-4 flex flex-col items-center border border-gray-100">
 
-                {{-- 正方形画像 --}}
-                <div class="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                {{-- 画像（正方形 + グラデーション） --}}
+                <div class="w-full aspect-square relative rounded-xl overflow-hidden shadow-sm">
                     <img src="{{ asset('storage/'.$s->image) }}"
                          alt="{{ $s->name }}"
                          class="object-cover w-full h-full">
+
+                    <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
                 </div>
 
                 {{-- 商品名 --}}
-                <h3 class="mt-3 text-sm font-bold text-gray-800 text-center">
+                <h3 class="mt-4 text-sm font-bold text-gray-800 text-center line-clamp-2">
                     {{ $s->name }}
                 </h3>
 
-                {{-- 値段 --}}
-                <p class="text-gray-600 text-xs text-center">
+                {{-- 価格 --}}
+                <p class="text-gray-600 text-xs text-center mt-1">
                     ¥{{ number_format($s->price) }}
                 </p>
 
                 {{-- ▼ 数量変更（＋ / −） --}}
-                <div class="flex items-center justify-center mt-3 gap-2">
+                <div class="flex items-center justify-center mt-4 gap-3">
 
                     {{-- 数量 -1 --}}
                     <form method="POST" action="{{ route('cart.decrease', $s->id) }}">
                         @csrf
                         <button type="submit"
-                            class="px-2 py-1 bg-gray-300 hover:bg-gray-400 rounded text-sm font-bold">
+                            class="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-full text-lg font-bold shadow">
                             −
                         </button>
                     </form>
@@ -57,18 +59,19 @@
                     <form method="POST" action="{{ route('cart.increase', $s->id) }}">
                         @csrf
                         <button type="submit"
-                            class="px-2 py-1 bg-gray-300 hover:bg-gray-400 rounded text-sm font-bold">
+                            class="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-full text-lg font-bold shadow">
                             ＋
                         </button>
                     </form>
+
                 </div>
 
-                {{-- 削除 --}}
-                <form method="POST" action="{{ route('cart.remove', $s->id) }}" class="mt-3 w-full">
+                {{-- 削除ボタン --}}
+                <form method="POST" action="{{ route('cart.remove', $s->id) }}" class="mt-4 w-full">
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                        class="w-full bg-red-500 hover:bg-red-600 text-white text-sm py-1.5 rounded">
+                        class="w-full bg-red-500 hover:bg-red-600 text-white text-sm py-2 rounded-xl shadow">
                         削除する
                     </button>
                 </form>

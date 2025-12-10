@@ -58,75 +58,89 @@
                 }
             @endphp
 
-            <div class="bg-white rounded-xl shadow hover:shadow-xl transition p-4 flex flex-col items-center">
+            <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 p-4 flex flex-col items-center border border-gray-100">
 
-                {{-- 正方形画像 --}}
-                <div class="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                    <img src="{{ asset('storage/'.$s->image) }}"
-                         alt="{{ $s->name }}"
-                         class="object-cover w-full h-full">
-                </div>
+    {{-- 画像枠 --}}
+    <div class="w-full aspect-square relative rounded-xl overflow-hidden shadow-sm">
 
-                <h3 class="mt-3 text-sm font-bold text-gray-800 text-center">
-                    {{ $s->name }}
-                </h3>
+        {{-- 画像 --}}
+        <img src="{{ asset('storage/'.$s->image) }}"
+             alt="{{ $s->name }}"
+             class="object-cover w-full h-full">
 
-                <p class="text-gray-600 text-xs text-center">
-                    ¥{{ number_format($s->price) }}
-                </p>
+        {{-- 上部グラデーション（高級感UP） --}}
+        <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
 
-                <div class="mt-3 space-y-2 w-full">
+        {{-- ハート（お気に入り） --}}
+        <div class="absolute bottom-2 right-2">
+            @auth
+            <form method="POST" action="{{ route('favorite.toggle', $s->id) }}" >
+                @csrf
+                <button type="submit"
+                    class="flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-md border border-gray-200 rounded-full shadow hover:scale-110 transition">
 
-    {{-- お気に入りボタン --}}
-    @auth
-        <form method="POST" action="{{ route('favorite.toggle', $s->id) }}">
-            @csrf
-            <button type="submit"
-                class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-1.5 rounded-lg transition">
-                お気に入り
-            </button>
-        </form>
-    @else
-        <a href="{{ route('login') }}"
-            class="w-full block text-center bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm py-1.5 rounded-lg transition">
-            お気に入り
-        </a>
-    @endauth
+                    @if($isFavorited)
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="#e63946" viewBox="0 0 24 24" class="w-6 h-6">
+                            <path d="M12 21.35l-1.45-1.32C5.4 
+                            15.36 2 12.28 2 8.5 2 5.42 
+                            4.42 3 7.5 3c1.74 0 3.41 
+                            0.81 4.5 2.09C13.09 3.81 
+                            14.76 3 16.5 3 19.58 3 
+                            22 5.42 22 8.5c0 3.78-3.4 
+                            6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="#ccc" viewBox="0 0 24 24" class="w-6 h-6">
+                            <path d="M12 21.35l-1.45-1.32C5.4 
+                            15.36 2 12.28 2 8.5 2 5.42 
+                            4.42 3 7.5 3c1.74 0 3.41 
+                            0.81 4.5 2.09C13.09 3.81 
+                            14.76 3 16.5 3 19.58 3 
+                            22 5.42 22 8.5c0 3.78-3.4 
+                            6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    @endif
 
-{{-- カートに追加 --}}
-@auth
-    <form method="POST" action="{{ route('cart.add', $s->id) }}" class="space-y-2">
-        @csrf
-
-        {{-- ▼ 数量選択（ラベル付き） --}}
-        <div class="flex items-center gap-2">
-            <label class="text-sm text-gray-700 whitespace-nowrap">数量</label>
-            <select name="quantity"
-                class="border rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-400 w-full">
-                @for ($i = 1; $i <= 10; $i++)
-                    <option value="{{ $i }}">{{ $i }}</option>
-                @endfor
-            </select>
+                </button>
+            </form>
+            @endauth
         </div>
 
-        <button type="submit"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg transition">
-            カートに追加
-        </button>
-    </form>
-@else
+    </div>
 
-        <a href="{{ route('login') }}"
-            class="w-full block text-center bg-blue-500 hover:bg-blue-600 text-white text-sm py-1.5 rounded-lg transition">
-            カートに追加
-        </a>
-    @endauth
+    {{-- テキスト類 --}}
+    <h3 class="mt-4 text-base font-bold text-gray-800 text-center">
+        {{ $s->name }}
+    </h3>
 
+    <p class="text-gray-600 text-sm text-center">
+        ¥{{ number_format($s->price) }}
+    </p>
 
+    {{-- ボタン・数量 --}}
+    <div class="mt-4 w-full space-y-3">
+
+        {{-- 数量 --}}
+<div class="flex items-center gap-2 justify-end">
+    <select name="quantity"
+        class="border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400 w-full">
+        @for ($i = 1; $i <= 10; $i++)
+            <option value="{{ $i }}">{{ $i }}</option>
+        @endfor
+    </select>
 </div>
 
+        {{-- カート --}}
+        <form method="POST" action="{{ route('cart.add', $s->id) }}" class="flex-1">
+            @csrf
+            <button type="submit"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 rounded-lg shadow transition">
+                カートに追加
+            </button>
+        </form>
+    </div>
 
-            </div>
+</div>
 
         @empty
             <p class="col-span-full text-center text-gray-500">
