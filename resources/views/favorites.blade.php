@@ -3,7 +3,7 @@
 @section('title', 'お気に入り一覧')
 
 @section('content')
-<div class="flex flex-col justify-center items-center bg-gray-50 py-6">
+<div class="flex flex-col justify-center items-center bg-gray-50">
 
     <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">
         お気に入り一覧

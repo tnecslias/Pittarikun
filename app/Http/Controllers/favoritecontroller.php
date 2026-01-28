@@ -27,28 +27,39 @@ class FavoriteController extends Controller
     /**
      * お気に入りの追加・削除 (toggle)
      */
-    public function toggle($id)
-    {
-        $user = Auth::user();
-
-        // 既に登録されているか確認
-        $exists = Favorite::where('user_id', $user->id)
-            ->where('storage_id', $id)
-            ->exists();
-
-        if ($exists) {
-            // 💔 登録済 → 削除
-            Favorite::where('user_id', $user->id)
-                ->where('storage_id', $id)
-                ->delete();
-        } else {
-            // ❤️ 未登録 → 追加
-            Favorite::create([
-                'user_id'    => $user->id,
-                'storage_id' => $id,
-            ]);
-        }
-
-        return back()->with('success', 'お気に入りを更新しました');
+public function toggle($id)
+{
+    // ★未ログインなら、ログイン後に自動登録してお気に入りページへ
+    if (!Auth::check()) {
+        session([
+            'after_login_action' => [
+                'type' => 'favorite',
+                'product_id' => $id
+            ]
+        ]);
+        return redirect('/login');
     }
+
+    $user = Auth::user();
+
+    // 既に登録されているか確認
+    $exists = Favorite::where('user_id', $user->id)
+        ->where('storage_id', $id)
+        ->exists();
+
+    if ($exists) {
+        // 登録済 → 削除
+        Favorite::where('user_id', $user->id)
+            ->where('storage_id', $id)
+            ->delete();
+    } else {
+        // 未登録 → 追加
+        Favorite::create([
+            'user_id'    => $user->id,
+            'storage_id' => $id,
+        ]);
+    }
+
+    return back()->with('success', 'お気に入りを更新しました');
+}
 }

@@ -2,7 +2,7 @@
 @section('title', 'カート')
 
 @section('content')
-<div class="flex flex-col justify-center items-center bg-gray-50 py-6">
+<div class="flex flex-col justify-center items-center bg-gray-50">
 
     <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">
         カート

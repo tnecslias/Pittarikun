@@ -71,40 +71,60 @@
         {{-- 上部グラデーション（高級感UP） --}}
         <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
 
-        {{-- ハート（お気に入り） --}}
-        <div class="absolute bottom-2 right-2">
-            @auth
-            <form method="POST" action="{{ route('favorite.toggle', $s->id) }}" >
-                @csrf
-                <button type="submit"
-                    class="flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-md border border-gray-200 rounded-full shadow hover:scale-110 transition">
+{{-- お気に入り（ハート） --}}
+<div class="absolute bottom-2 right-2">
 
-                    @if($isFavorited)
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#e63946" viewBox="0 0 24 24" class="w-6 h-6">
-                            <path d="M12 21.35l-1.45-1.32C5.4 
-                            15.36 2 12.28 2 8.5 2 5.42 
-                            4.42 3 7.5 3c1.74 0 3.41 
-                            0.81 4.5 2.09C13.09 3.81 
-                            14.76 3 16.5 3 19.58 3 
-                            22 5.42 22 8.5c0 3.78-3.4 
-                            6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
-                    @else
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="#ccc" viewBox="0 0 24 24" class="w-6 h-6">
-                            <path d="M12 21.35l-1.45-1.32C5.4 
-                            15.36 2 12.28 2 8.5 2 5.42 
-                            4.42 3 7.5 3c1.74 0 3.41 
-                            0.81 4.5 2.09C13.09 3.81 
-                            14.76 3 16.5 3 19.58 3 
-                            22 5.42 22 8.5c0 3.78-3.4 
-                            6.86-8.55 11.54L12 21.35z"/>
-                        </svg>
-                    @endif
+    @auth
+        {{-- ===== ログイン時 ===== --}}
+        <form method="POST" action="{{ route('favorite.toggle', $s->id) }}">
+            @csrf
+            <button type="submit"
+                class="flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-md border border-gray-200 rounded-full shadow hover:scale-110 transition">
+                @if($isFavorited)
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="#e63946" viewBox="0 0 24 24" class="w-6 h-6">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                        2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
+                        C13.09 3.81 14.76 3 16.5 3 19.58 3
+                        22 5.42 22 8.5c0 3.78-3.4
+                        6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                @else
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="#ccc" viewBox="0 0 24 24" class="w-6 h-6">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                        2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
+                        C13.09 3.81 14.76 3 16.5 3 19.58 3
+                        22 5.42 22 8.5c0 3.78-3.4
+                        6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                @endif
+            </button>
+        </form>
+    @endauth
 
+    @guest
+        {{-- ===== 未ログイン時（ぼかし） ===== --}}
+        <div class="relative">
+
+            <div class="blur-sm opacity-60 pointer-events-none">
+                <button
+                    class="flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-md border border-gray-200 rounded-full shadow">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="#ccc" viewBox="0 0 24 24" class="w-6 h-6">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                        2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
+                        C13.09 3.81 14.76 3 16.5 3 19.58 3
+                        22 5.42 22 8.5c0 3.78-3.4
+                        6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
                 </button>
-            </form>
-            @endauth
+            </div>
+
         </div>
+    @endguest
+
+</div>
+
+
+                    
 
     </div>
 
@@ -117,28 +137,66 @@
         ¥{{ number_format($s->price) }}
     </p>
 
+
     {{-- ボタン・数量 --}}
-    <div class="mt-4 w-full space-y-3">
+<div class="mt-4 w-full space-y-3 relative">
 
-        {{-- 数量 --}}
-<div class="flex items-center gap-2 justify-end">
-    <select name="quantity"
-        class="border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400 w-full">
-        @for ($i = 1; $i <= 10; $i++)
-            <option value="{{ $i }}">{{ $i }}</option>
-        @endfor
-    </select>
-</div>
+    @auth
+        {{-- ===== ログイン時（通常操作） ===== --}}
+        <select name="quantity"
+            class="border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400 w-full">
+            @for ($i = 1; $i <= 10; $i++)
+                <option value="{{ $i }}">{{ $i }}</option>
+            @endfor
+        </select>
 
-        {{-- カート --}}
-        <form method="POST" action="{{ route('cart.add', $s->id) }}" class="flex-1">
+        <form method="POST" action="{{ route('cart.add', $s->id) }}">
             @csrf
             <button type="submit"
-            class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 rounded-lg shadow transition">
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 rounded-lg shadow">
                 カートに追加
             </button>
         </form>
+
+    @endauth
+
+
+@guest
+<div class="relative w-full">
+
+    {{-- ===== 未ログイン時（ぼかし表示） ===== --}}
+    <div class="space-y-3 blur-sm opacity-60 pointer-events-none">
+
+        <select
+            class="border rounded-lg px-3 py-1.5 text-sm w-full">
+            <option>1</option>
+        </select>
+
+        <button
+            class="w-full bg-blue-400 text-white text-sm py-2 rounded-lg shadow">
+            カートに追加
+        </button>
+
     </div>
+
+{{-- ===== ぼかしの上に重ねるメッセージ ===== --}}
+<div class="absolute inset-0 flex items-center justify-center">
+    <p class="text-xs text-gray-600 text-center">
+        <a href="{{ route('login') }}"
+           class="text-blue-600 underline cursor-pointer hover:text-blue-800">
+            ログイン
+        </a>
+        するとお気に入り・カート追加ができます
+    </p>
+</div>
+
+
+</div>
+@endguest
+
+
+</div>
+
 
 </div>
 

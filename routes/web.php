@@ -9,6 +9,25 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProfileController;
 
+use Illuminate\Support\Facades\Auth;
+
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/login');   // ← ログイン画面へ戻す
+})->name('logout');
+
+
+Route::middleware('auth')->group(function () {
+
+    // カート
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+
+    // お気に入り
+    Route::post('/favorite/toggle/{id}', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
+    Route::get('/favorite', [FavoriteController::class, 'index'])->name('favorite.index');
+
+});
 
 // ▼ ホーム（誰でもアクセスOK）
 Route::get('/', [HomeController::class, 'index'])->name('home');
