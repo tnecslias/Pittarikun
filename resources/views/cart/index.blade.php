@@ -78,6 +78,7 @@
 
             </div>
 
+    
         @empty
             <p class="col-span-full text-center text-gray-500">
                 カートは空です。
@@ -85,6 +86,33 @@
         @endforelse
 
     </div>
+    @php
+    $total = 0;
+    foreach ($cart_items as $item) {
+        if ($item->storage) {
+            $total += $item->storage->price * $item->quantity;
+        }
+    }
+@endphp
+
+<div class="mt-6 w-full max-w-md mx-auto bg-white rounded-xl shadow p-4 text-center">
+    <p class="text-gray-600 text-sm">合計金額</p>
+    <p class="text-2xl font-bold text-gray-800 mt-1">
+        ¥{{ number_format($total) }}
+    </p>
+</div>
+
+@if($cart_items->isNotEmpty())
+    <div class="mt-6 w-full max-w-md mx-auto">
+
+        <a href="{{ route('checkout.index') }}"
+           class="block w-full text-center bg-blue-500 hover:bg-blue-600
+                  text-white font-bold py-3 rounded-xl shadow">
+            購入へ進む
+        </a>
+
+    </div>
+@endif
 
 </div>
 @endsection

@@ -8,6 +8,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CheckoutController;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -64,6 +65,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 
     Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
+    Route::post('/checkout/complete', [CheckoutController::class, 'complete'])
+    ->name('checkout.complete');
 
     Route::post('/cart/increase/{id}', [CartController::class, 'increase'])->name('cart.increase');
     Route::post('/cart/decrease/{id}', [CartController::class, 'decrease'])->name('cart.decrease');
@@ -73,5 +78,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/cart/{id}', [App\Http\Controllers\CartController::class, 'remove'])
         ->name('cart.remove');
 
+        
 });
 });
