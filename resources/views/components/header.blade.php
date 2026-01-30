@@ -12,7 +12,7 @@
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-500 font-medium">ホーム</a>
                 <a href="{{ route('favorites') }}" class="text-gray-700 hover:text-blue-500 font-medium">お気に入り</a>
                 <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-blue-500 font-medium">カート</a>
-                <a href="{{ route('profile.edit') }}" class="text-gray-700 hover:text-blue-500 font-medium">マイページ</a>
+                <a href="{{ route('mypage') }}" class="text-gray-700 hover:text-blue-500 font-medium">マイページ</a>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="text-gray-700 hover:text-red-500 font-medium">ログアウト</button>
