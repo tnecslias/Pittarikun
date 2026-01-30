@@ -49,6 +49,6 @@ class RegisteredUserController extends Controller
         // ログイン
         Auth::login($user);
 
-        return redirect()->route('profile.edit');
+        return redirect()->route('mypage');
     }
 }

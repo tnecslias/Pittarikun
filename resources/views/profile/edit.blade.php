@@ -10,13 +10,6 @@
             プロフィール編集
         </h2>
 
-        {{-- 更新完了メッセージ --}}
-        @if (session('status') === 'profile-updated')
-            <div class="mb-4 text-green-600 text-center font-semibold">
-                プロフィールを更新しました
-            </div>
-        @endif
-
         <form method="POST" action="{{ route('profile.update') }}">
             @csrf
             @method('PATCH')
