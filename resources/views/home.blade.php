@@ -10,7 +10,7 @@
         収納スペースの大きさを入力してください
     </h2>
 
-    {{-- ========= ① 入力フォーム（白い枠） ========= --}}
+    {{-- ========= 入力フォーム========= --}}
     <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8">
 
         {{-- 検索フォーム --}}
@@ -41,7 +41,7 @@
 
     </div> 
 
-    {{-- ここから下に検索結果を出す --}}
+    {{-- 検索結果 --}}
 
 @isset($storages)
 
@@ -49,7 +49,7 @@
 
         @forelse($storages as $s)
 
-            {{-- ★ ここで isFavorited を安全に計算する --}}
+            {{--  isFavorited を計算する --}}
             @php
                 $isFavorited = false;
                 if (auth()->check()) {
@@ -68,7 +68,7 @@
              alt="{{ $s->name }}"
              class="object-cover w-full h-full">
 
-        {{-- 上部グラデーション（高級感UP） --}}
+        {{-- 上部グラデーション --}}
         <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
 
 {{-- お気に入り（ハート） --}}
@@ -129,36 +129,36 @@
     </div>
 
     {{-- テキスト類 --}}
-    <h3 class="mt-4 text-base font-bold text-gray-800 text-center">
+    <h3 class="mt-6 text-sm font-bold text-gray-800 text-center">
         {{ $s->name }}
     </h3>
 
-    <p class="text-gray-600 text-sm text-center">
+    <p class="text-gray-600 mt-1 text-sm text-center">
         ¥{{ number_format($s->price) }}
     </p>
 
 
     {{-- ボタン・数量 --}}
-<div class="mt-4 w-full space-y-3 relative">
+<div class="mt-2 w-full space-y-3 relative">
 
-    @auth
-        {{-- ===== ログイン時（通常操作） ===== --}}
-        <select name="quantity"
-            class="border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400 w-full">
-            @for ($i = 1; $i <= 10; $i++)
-                <option value="{{ $i }}">{{ $i }}</option>
-            @endfor
-        </select>
+@auth
+<form method="POST" action="{{ route('cart.add', $s->id) }}" class="space-y-2">
+    @csrf
 
-        <form method="POST" action="{{ route('cart.add', $s->id) }}">
-            @csrf
-            <button type="submit"
-                class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 rounded-lg shadow">
-                カートに追加
-            </button>
-        </form>
+    <select name="quantity"
+        class="border rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400 w-full">
+        @for ($i = 1; $i <= 10; $i++)
+            <option value="{{ $i }}">{{ $i }}</option>
+        @endfor
+    </select>
 
-    @endauth
+    <button type="submit"
+        class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm py-2 rounded-lg shadow">
+        カートに追加
+    </button>
+</form>
+@endauth
+
 
 
 @guest

@@ -6,8 +6,9 @@
     <title>@yield('title') - ぴったりくん</title>
 
     {{-- Tailwind / Vite --}}
-    @vite('resources/css/app.css')
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 
 {{-- ★★ フッター固定のために flex-col + min-h-screen を追加！ ★★ --}}
 <body class="bg-gray-50 min-h-screen flex flex-col">
@@ -15,7 +16,7 @@
     {{-- ヘッダー --}}
     @include('components.header')
 
-    <main class="pt-20 flex-grow">
+    <main class="pt-24 flex-grow px-4 sm:px-6 lg:px-8 max-w-8xl mx-auto w-full">
 
     {{-- ▼ メッセージ表示（success / error） --}}
 {{-- ▼ 中央モーダル ▼ --}}

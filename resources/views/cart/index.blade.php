@@ -30,7 +30,7 @@
                 </div>
 
                 {{-- 商品名 --}}
-                <h3 class="mt-4 text-sm font-bold text-gray-800 text-center line-clamp-2">
+                <h3 class="mt-6 text-sm font-bold text-gray-800 text-center line-clamp-2">
                     {{ $s->name }}
                 </h3>
 

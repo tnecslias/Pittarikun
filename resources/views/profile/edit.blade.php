@@ -60,7 +60,7 @@
             <div class="flex justify-between items-center">
                 <a href="{{ route('mypage') }}"
                    class="text-gray-600 hover:underline">
-                    ← 戻る
+                    マイページに戻る
                 </a>
 
                 <button

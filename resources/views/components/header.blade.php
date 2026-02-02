@@ -1,5 +1,5 @@
-<nav class="bg-white shadow-lg z-10">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+<nav class="fixed top-0 left-0 w-full h-16 bg-white shadow-lg z-50">
+    <div class="container mx-auto px-6 h-full flex justify-between items-center">
         <div class="flex items-center space-x-4">
             <img src="{{ asset('images/logo.png') }}" alt="Pittarikun Logo" class="h-8 w-8">
             <a href="{{ route('home') }}" class="text-xl font-bold text-gray-800 hover:text-blue-500">ぴったりくん</a>
