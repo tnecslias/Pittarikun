@@ -6,7 +6,7 @@
         </div>
         <div class="flex items-center space-x-4">
             @guest
-                <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-500 font-medium">Home</a>
+                <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-500 font-medium">ホーム</a>
                 <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-500 font-medium">ログイン</a>
             @else
                 <a href="{{ route('home') }}" class="text-gray-700 hover:text-blue-500 font-medium">ホーム</a>

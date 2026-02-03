@@ -6,7 +6,7 @@
 <div class="flex flex-col justify-center items-center bg-gray-50">
 
     {{-- タイトル --}}
-    <h2 class="text-2xl font-bold mb-4 text-gray-800 text-center">
+    <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">
         収納スペースの大きさを入力してください
     </h2>
 

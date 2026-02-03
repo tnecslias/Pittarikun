@@ -14,10 +14,16 @@
         @csrf
 
         {{-- 名前 --}}
-        <div class="space-y-2 text-sm mb-4">
-            <p><strong>お名前：</strong> {{ $name }}</p>
-            <input type="hidden" name="name" value="{{ $name }}">
-        </div>
+        <div class="space-y-3 mt-4">
+            <div>
+                <label class="block text-xs text-gray-600 mb-1">
+                    名前
+                </label>
+                <input type="text" name="name"
+                       value="{{ old('name') }}"
+                       class="w-full border rounded-lg px-3 py-2 text-sm"
+                       required>
+            </div>
 
         {{-- 住所・電話番号 --}}
         <div class="space-y-3 mt-4">
