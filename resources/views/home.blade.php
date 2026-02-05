@@ -17,19 +17,22 @@
         <form method="GET" action="{{ route('storage.search') }}" class="space-y-4">
             <div>
                 <label class="block mb-1 font-medium text-gray-700">幅 (cm)</label>
-                <input type="number" name="width" placeholder="例: 100"
-                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400">
+                <input type="number" name="width" placeholder="例: 26"
+                    value="{{ request('width') }}"
+                    class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400">
             </div>
 
             <div>
                 <label class="block mb-1 font-medium text-gray-700">高さ (cm)</label>
-                <input type="number" name="height" placeholder="例: 200"
-                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400">
+                <input type="number" name="height" placeholder="例: 16"
+                    value="{{ request('height') }}"
+                    class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400">
             </div>
 
             <div>
                 <label class="block mb-1 font-medium text-gray-700">奥行き (cm)</label>
-                <input type="number" name="depth" placeholder="例: 50"
+                <input type="number" name="depth" placeholder="例: 36"
+                    value="{{ request('depth') }}"
                     class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400">
             </div>
 
@@ -212,39 +215,7 @@
 
 
 
-    {{-- ========= ③ 候補カード（正方形） ========= --}}
-    @if(isset($results))
-        <h3 class="text-xl font-bold mt-12 text-center">入れられる組み合わせ候補</h3>
 
-        <div class="mt-6 grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
-            @forelse($results as $r)
-            <div class="bg-white rounded-xl shadow hover:shadow-xl transition p-4 flex flex-col items-center">
-
-                <div class="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                    <img src="{{ asset('storage/'.$r['case']->image) }}"
-                         alt="{{ $r['case']->name }}"
-                         class="object-cover w-full h-full">
-                </div>
-
-                <h4 class="mt-3 text-sm font-bold text-gray-800 text-center">
-                    {{ $r['case']->name }}
-                </h4>
-
-                <p class="text-gray-600 text-xs">パターン: {{ $r['pattern'] }} cm</p>
-                <p class="text-gray-600 text-xs">配置: {{ $r['layout'] }}</p>
-
-                <p class="text-gray-800 font-bold text-lg mt-2">
-                    {{ $r['count'] }} 個
-                </p>
-
-            </div>
-            @empty
-                <p class="col-span-full text-center text-gray-500">
-                    条件に合う組み合わせはありません。
-                </p>
-            @endforelse
-        </div>
-    @endif
 
 </div>
 @endsection

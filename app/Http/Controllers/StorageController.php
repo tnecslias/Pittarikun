@@ -35,44 +35,26 @@ class StorageController extends Controller
     /**
      * 収納スペース検索
      */
-    public function search(Request $request)
+        public function search(Request $request)
     {
-        // バリデーション（任意入力）
-        $request->validate([
-            'width'  => 'nullable|numeric|min:1',
-            'height' => 'nullable|numeric|min:1',
-            'depth'  => 'nullable|numeric|min:1',
-        ]);
-
-        // ユーザー入力を変数へ
-        $userW = $request->width;
-        $userH = $request->height;
-        $userD = $request->depth;
-
-        // クエリ作成
         $query = Storage::query();
 
-        // 幅：ユーザー入力以上はNG、1cm以上余るのもNG
-        if ($userW) {
-            $query->where('width', '<=', $userW)
-                ->whereRaw('( ? - width ) <= 1', [$userW]);
+        if ($request->filled('width')) {
+            $query->where('width', '<=', (int)$request->width);
         }
 
-        // 高さ
-        if ($userH) {
-            $query->where('height', '<=', $userH)
-                ->whereRaw('( ? - height ) <= 1', [$userH]);
+        if ($request->filled('height')) {
+            $query->where('height', '<=', (int)$request->height);
         }
 
-        // 奥行き
-        if ($userD) {
-            $query->where('depth', '<=', $userD)
-                ->whereRaw('( ? - depth ) <= 1', [$userD]);
+        if ($request->filled('depth')) {
+            $query->where('depth', '<=', (int)$request->depth);
         }
 
-        // 結果取得
         $storages = $query->get();
 
         return view('home', compact('storages'));
     }
+
+
 }
