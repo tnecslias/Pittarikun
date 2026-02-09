@@ -45,59 +45,36 @@ Route::post('/storage/submit', [StorageController::class, 'submit'])->name('stor
 Route::middleware('auth')->group(function () {
 
     /*
-    | マイページ（表示）
+    | マイページ
     */
-Route::middleware('auth')->group(function () {
+    Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
 
-Route::get('/mypage', [MypageController::class, 'index'])
-    ->middleware('auth')
-    ->name('mypage');
-
-    // プロフィール編集画面
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-
-    // プロフィール更新
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
-});
+    /*
+    | プロフィール
+    */
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     /*
     | お気に入り
     */
-    Route::get('/favorites', [FavoriteController::class, 'index'])
-        ->name('favorites');
-
-    Route::post('/favorites/toggle/{id}', [FavoriteController::class, 'toggle'])
-        ->name('favorite.toggle');
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites');
+    Route::post('/favorites/toggle/{id}', [FavoriteController::class, 'toggle'])->name('favorite.toggle');
 
     /*
     | カート
     */
-    Route::get('/cart', [CartController::class, 'index'])
-        ->name('cart.index');
-
-    Route::post('/cart/add/{id}', [CartController::class, 'add'])
-        ->name('cart.add');
-
-    Route::post('/cart/increase/{id}', [CartController::class, 'increase'])
-        ->name('cart.increase');
-
-    Route::post('/cart/decrease/{id}', [CartController::class, 'decrease'])
-        ->name('cart.decrease');
-
-    Route::delete('/cart/{id}', [CartController::class, 'remove'])
-        ->name('cart.remove');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/increase/{id}', [CartController::class, 'increase'])->name('cart.increase');
+    Route::post('/cart/decrease/{id}', [CartController::class, 'decrease'])->name('cart.decrease');
+    Route::delete('/cart/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
     /*
     | チェックアウト
     */
-    Route::get('/checkout', [CheckoutController::class, 'index'])
-        ->name('checkout.index');
-
-    Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])
-        ->name('checkout.confirm');
-
-    Route::post('/checkout/complete', [CheckoutController::class, 'complete'])
-        ->name('checkout.complete');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
+    Route::post('/checkout/payment', [CheckoutController::class, 'payment'])->name('checkout.payment');
+    Route::post('/checkout/complete', [CheckoutController::class, 'complete'])->name('checkout.complete');
 });

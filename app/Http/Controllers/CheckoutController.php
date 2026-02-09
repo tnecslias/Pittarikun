@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use App\Models\CartItem;
 
 class CheckoutController extends Controller
@@ -11,53 +12,104 @@ class CheckoutController extends Controller
     /**
      * 購入情報入力画面
      */
-    public function index()
-    {
-        $cart_items = CartItem::where('user_id', Auth::id())
-            ->with('storage')
-            ->get();
+public function index(Request $request)
+{
+    $cart_items = CartItem::where('user_id', Auth::id())
+        ->with('storage')
+        ->get();
 
-        if ($cart_items->isEmpty()) {
-            return redirect()->route('cart.index')
-                ->with('error', 'カートが空です');
-        }
-
-        $name = Auth::user()->name;
-
-        return view('checkout.index', compact('cart_items', 'name'));
+    if ($cart_items->isEmpty()) {
+        return redirect()->route('cart.index')
+            ->with('error', 'カートが空です');
     }
+
+    $name = Auth::user()->name;
+
+    // 支払い方法をセッションに保存（もし送信されていれば）
+    if ($request->has('payment_method')) {
+        Session::put('payment_method', $request->input('payment_method'));
+    }
+
+    // セッションから支払い方法を取得してビューに渡す
+    $payment_method = Session::get('payment_method', '');
+
+    return view('checkout.index', compact('cart_items', 'name', 'payment_method'));
+}
+
 
     /**
      * 入力内容確認画面
      */
-    public function confirm(Request $request)
-    {
+public function confirm(Request $request)
+{
+    if ($request->isMethod('post')) {
         $data = $request->validate([
-            'name'    => 'required',
-            'address' => 'required',
-            'phone'   => 'required',
+            'name'           => 'required',
+            'address'        => 'required',
+            'phone'          => 'required',
+            'payment_method' => 'required',
         ]);
 
-        $cart_items = CartItem::where('user_id', Auth::id())
-            ->with('storage')
-            ->get();
-
-        return view('checkout.confirm', [
-            'name'       => $data['name'],
-            'address'    => $data['address'],
-            'phone'      => $data['phone'],
-            'cart_items' => $cart_items,
-        ]);
+        Session::put('checkout', $data);
     }
 
+    $checkout = Session::get('checkout', []);
+
+    return view('checkout.confirm', [
+        'name'           => $checkout['name'] ?? '',
+        'address'        => $checkout['address'] ?? '',
+        'phone'          => $checkout['phone'] ?? '',
+        'payment_method' => $checkout['payment_method'] ?? '',
+        'cart_items'     => CartItem::where('user_id', Auth::id())->with('storage')->get(),
+    ]);
+}
+
+
+
+
+
+/**
+ * 決済処理（ダミー）
+ */
+public function payment(Request $request)
+{
+    $data = $request->validate([
+        'name'           => 'required',
+        'address'        => 'required',
+        'phone'          => 'required',
+        'payment_method' => 'required',
+    ]);
+
+    // セッションに保存
+    Session::put('checkout', $data);
+
+    // ← これを追加（重要）
+    return view('checkout.payment', [
+        'payment_method' => $data['payment_method']
+    ]);
+}
+
     /**
-     * 注文完了画面
+     * 注文完了
      */
-    public function complete(Request $request)
+    public function complete()
     {
-        // ・注文データ保存
+        $checkout = Session::get('checkout');
+
+        if (!$checkout) {
+            return redirect()->route('cart.index');
+        }
+
+        // 本来はここで
+        // ・ordersテーブル保存
+        // ・order_items保存
         // ・在庫減算
-    CartItem::where('user_id', Auth::id())->delete();
+
+        // カート削除
+        CartItem::where('user_id', Auth::id())->delete();
+
+        // セッション削除
+        Session::forget('checkout');
 
         return view('checkout.complete');
     }

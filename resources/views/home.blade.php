@@ -172,17 +172,15 @@
 
 @if(request('width') && isset($s->fit_count) && $s->fit_count >= 1)
 
-<span class="width-label px-3 py-1 text-xs font-bold rounded-full
-    @if($s->remaining_width == 0)
-        bg-green-100 text-green-700
-    @elseif($s->remaining_width > 0)
-        bg-gray-100 text-gray-700
-    @else
-        bg-red-100 text-red-700
-    @endif
-"
+<span @class([
+    'width-label px-3 py-1 text-xs font-bold rounded-full',
+    'bg-green-100 text-green-700' => $s->remaining_width == 0,
+    'bg-gray-100 text-gray-700' => $s->remaining_width > 0,
+    'bg-red-100 text-red-700' => $s->remaining_width < 0,
+])
 data-storage-width="{{ request('width') }}"
 data-case-width="{{ $s->width }}">
+
 
     @if($s->remaining_width == 0)
         幅：ぴったり！
