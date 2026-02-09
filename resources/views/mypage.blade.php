@@ -14,6 +14,15 @@
     <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8 mb-6">
         <p><strong>名前：</strong> {{ $user->name }}</p>
         <p><strong>メール：</strong> {{ $user->email }}</p>
+        <p>
+            <strong>住所：</strong>
+            {{ $user->address ?? '未登録' }}
+        </p>
+
+        <p>
+            <strong>電話番号：</strong>
+            {{ $user->phone ?? '未登録' }}
+        </p>
         <p><strong>登録日：</strong> {{ $user->created_at->format('Y年m月d日') }}</p>
 
         <div class="mt-4 text-center">

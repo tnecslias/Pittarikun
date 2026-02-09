@@ -35,8 +35,9 @@
                 @enderror
             </div>
 
+
             {{-- メールアドレス --}}
-            <div class="mb-6">
+            <div class="mb-4">
                 <label for="email" class="block font-bold mb-1">
                     メールアドレス
                 </label>
@@ -56,6 +57,51 @@
                 @enderror
             </div>
 
+
+            {{-- 住所（追加） --}}
+            <div class="mb-4">
+                <label for="address" class="block font-bold mb-1">
+                    住所
+                </label>
+                <input
+                    id="address"
+                    type="text"
+                    name="address"
+                    value="{{ old('address', $user->address) }}"
+                    class="w-full border rounded px-3 py-2
+                           @error('address') border-red-500 @enderror"
+                >
+
+                @error('address')
+                    <p class="text-red-500 text-sm mt-1">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
+
+            {{-- 電話番号（追加） --}}
+            <div class="mb-6">
+                <label for="phone" class="block font-bold mb-1">
+                    電話番号
+                </label>
+                <input
+                    id="phone"
+                    type="text"
+                    name="phone"
+                    value="{{ old('phone', $user->phone) }}"
+                    class="w-full border rounded px-3 py-2
+                           @error('phone') border-red-500 @enderror"
+                >
+
+                @error('phone')
+                    <p class="text-red-500 text-sm mt-1">
+                        {{ $message }}
+                    </p>
+                @enderror
+            </div>
+
+
             {{-- ボタン --}}
             <div class="flex justify-between items-center">
                 <a href="{{ route('mypage') }}"
@@ -71,6 +117,7 @@
                     更新する
                 </button>
             </div>
+
         </form>
 
     </div>

@@ -18,29 +18,25 @@
             <div>
                 <label class="block text-xs text-gray-600 mb-1">名前</label>
                 <input type="text" name="name"
-                       value="{{ old('name') }}"
-                       class="w-full border rounded-lg px-3 py-2 text-sm"
-                       required>
+                    value="{{ old('name', $name) }}"
+                    class="w-full border rounded-lg px-3 py-2 text-sm"
+                    required>
             </div>
-        </div>
 
-        {{-- 住所・電話番号 --}}
-        <div class="space-y-3 mt-4">
             <div>
                 <label class="block text-xs text-gray-600 mb-1">住所</label>
                 <input type="text" name="address"
-                       value="{{ old('address') }}"
-                       class="w-full border rounded-lg px-3 py-2 text-sm"
-                       required>
+                    value="{{ old('address', $address) }}"
+                    class="w-full border rounded-lg px-3 py-2 text-sm">
             </div>
 
             <div>
                 <label class="block text-xs text-gray-600 mb-1">電話番号</label>
                 <input type="text" name="phone"
-                       value="{{ old('phone') }}"
-                       class="w-full border rounded-lg px-3 py-2 text-sm"
-                       required>
+                    value="{{ old('phone', $phone) }}"
+                    class="w-full border rounded-lg px-3 py-2 text-sm">
             </div>
+
         </div>
 
         {{-- 注文商品一覧 --}}
