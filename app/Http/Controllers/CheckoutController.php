@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use App\Models\CartItem;
+use App\Models\Order;
+use App\Models\OrderItem;
 
 class CheckoutController extends Controller
 {
@@ -83,7 +85,6 @@ public function payment(Request $request)
     // セッションに保存
     Session::put('checkout', $data);
 
-    // ← これを追加（重要）
     return view('checkout.payment', [
         'payment_method' => $data['payment_method']
     ]);
@@ -92,25 +93,50 @@ public function payment(Request $request)
     /**
      * 注文完了
      */
-    public function complete()
-    {
-        $checkout = Session::get('checkout');
+public function complete()
+{
+    $checkout = Session::get('checkout');
 
-        if (!$checkout) {
-            return redirect()->route('cart.index');
-        }
+    if (!$checkout) {
+        return redirect()->route('cart.index');
+    }
 
-        // 本来はここで
-        // ・ordersテーブル保存
-        // ・order_items保存
-        // ・在庫減算
+    $cart_items = CartItem::where('user_id', Auth::id())
+        ->with('storage')
+        ->get();
 
-        // カート削除
-        CartItem::where('user_id', Auth::id())->delete();
+    // 合計計算
+    $total = 0;
 
-        // セッション削除
-        Session::forget('checkout');
+    foreach ($cart_items as $item) {
+        $total += $item->storage->price * $item->quantity;
+    }
 
-        return view('checkout.complete');
+    // orders 保存
+    $order = Order::create([
+        'user_id'        => Auth::id(),
+        'name'           => $checkout['name'],
+        'address'        => $checkout['address'],
+        'phone'          => $checkout['phone'],
+        'payment_method' => $checkout['payment_method'],
+        'total_price'    => $total,
+    ]);
+
+    // order_items 保存
+    foreach ($cart_items as $item) {
+        OrderItem::create([
+            'order_id'   => $order->id,
+            'storage_id' => $item->storage_id,
+            'price'      => $item->storage->price,
+            'quantity'   => $item->quantity,
+        ]);
+    }
+
+    // カート削除
+    CartItem::where('user_id', Auth::id())->delete();
+
+    Session::forget('checkout');
+
+    return view('checkout.complete');
     }
 }
