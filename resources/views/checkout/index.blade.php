@@ -86,8 +86,51 @@
 <label class="flex items-center gap-2">
     <input type="radio" name="payment_method" value="credit_card"
         {{ old('payment_method', $payment_method) == 'credit_card' ? 'checked' : '' }}>
-    登録済みクレジットカード
+    クレジットカード
 </label>
+{{-- クレジットカード入力欄 --}}
+<div id="creditCardForm" class="mt-4 hidden mb-5">
+
+    <div class="space-y-3">
+
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">
+                カード番号
+            </label>
+            <input type="text"
+                name="card_number"
+                placeholder="4242 4242 4242 4242"
+                class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+
+        <div class="flex gap-3">
+
+            <div class="flex-1">
+                <label class="block text-xs text-gray-600 mb-1">
+                    有効期限
+                </label>
+                <input type="text"
+                    name="card_expiry"
+                    placeholder="MM/YY"
+                    class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+
+            <div class="flex-1">
+                <label class="block text-xs text-gray-600 mb-1">
+                    CVC
+                </label>
+                <input type="text"
+                    name="card_cvc"
+                    placeholder="123"
+                    class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 
 <label class="flex items-center gap-2">
     <input type="radio" name="payment_method" value="cash"
@@ -117,6 +160,30 @@
         </div>
 
     </form>
+<script>
+
+function toggleCreditCardForm() {
+
+    const selected = document.querySelector('input[name="payment_method"]:checked');
+    const form = document.getElementById('creditCardForm');
+
+    if (selected && selected.value === 'credit_card') {
+        form.classList.remove('hidden');
+    } else {
+        form.classList.add('hidden');
+    }
+
+}
+
+// ラジオ変更時
+document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+    radio.addEventListener('change', toggleCreditCardForm);
+});
+
+// 初期表示時
+window.addEventListener('load', toggleCreditCardForm);
+
+</script>
 
 </div>
 @endsection

@@ -8,106 +8,109 @@
     {{-- Tailwind / Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
 </head>
 
-
-{{-- ★★ フッター固定のために flex-col + min-h-screen を追加！ ★★ --}}
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col opacity-0">
 
     {{-- ヘッダー --}}
     @include('components.header')
 
+
+    {{-- ▼ トースト通知（success / error） --}}
+    @if(session('success') || session('error'))
+    <div id="toast"
+         class="fixed top-24 left-1/2 -translate-x-1/2 z-[9999]
+                opacity-0 -translate-y-5
+                transition-all duration-500">
+
+        <div class="
+            px-6 py-3 rounded-lg shadow-lg text-white font-semibold
+            {{ session('success') ? 'bg-gray-800' : 'bg-red-500' }}
+        ">
+            {{ session('success') ?? session('error') }}
+        </div>
+
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const toast = document.getElementById("toast");
+
+        // フェードイン
+        setTimeout(() => {
+            toast.style.opacity = "1";
+            toast.style.transform = "translate(-50%, 0)";
+        }, 50);
+
+        // フェードアウト
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translate(-50%, -20px)";
+        }, 1800);
+
+        // 削除
+        setTimeout(() => {
+            toast.remove();
+        }, 2300);
+
+    });
+    </script>
+    @endif
+
+
     <main class="pt-24 flex-grow px-4 sm:px-6 lg:px-8 max-w-8xl mx-auto w-full">
 
-    {{-- ▼ メッセージ表示（success / error） --}}
-{{-- ▼ 中央モーダル ▼ --}}
-@if(session('success'))
-<div id="center-modal-wrapper"
-     class="fixed inset-0 bg-black/40 flex justify-center items-center z-50
-            opacity-0 transition-opacity duration-500">
+        {{-- ▼ ページごとのコンテンツ --}}
+        @yield('content')
 
-    <div id="center-modal"
-         class="bg-white w-80 px-6 py-5 rounded-xl shadow-xl text-center
-                opacity-0 scale-95 transition-all duration-500">
-        <p class="text-lg font-semibold text-gray-800">
-            {{ session('success') }}
-        </p>
-    </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const wrapper = document.getElementById("center-modal-wrapper");
-    const modal = document.getElementById("center-modal");
-
-    // フェードイン
-    setTimeout(() => {
-        wrapper.style.opacity = 1;
-        modal.style.opacity = 1;
-        modal.style.transform = "scale(1)";
-    }, 100);
-
-    // 3秒後にフェードアウト
-    setTimeout(() => {
-        wrapper.style.opacity = 0;
-        modal.style.opacity = 0;
-        modal.style.transform = "scale(0.95)";
-    }, 3000);
-
-    // 完全に削除
-    setTimeout(() => {
-        wrapper.remove();
-    }, 3600);
-});
-</script>
-@endif
-
-@if(session('error'))
-<div id="center-modal-wrapper"
-     class="fixed inset-0 bg-black/40 flex justify-center items-center z-50 opacity-0 transition-opacity duration-500">
-
-    <div id="center-modal"
-         class="bg-red-500 w-80 px-6 py-5 rounded-xl shadow-xl text-center
-                text-white opacity-0 scale-95 transition-all duration-500">
-        <p class="text-lg font-semibold">
-            {{ session('error') }}
-        </p>
-    </div>
-</div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const wrapper = document.getElementById("center-modal-wrapper");
-    const modal = document.getElementById("center-modal");
-
-    setTimeout(() => {
-        wrapper.style.opacity = 1;
-        modal.style.opacity = 1;
-        modal.style.transform = "scale(1)";
-    }, 100);
-
-    setTimeout(() => {
-        wrapper.style.opacity = 0;
-        modal.style.opacity = 0;
-    }, 3000);
-
-    setTimeout(() => wrapper.remove(), 3600);
-});
-</script>
-@endif
+    </main>
 
 
-    {{-- ▼ ページごとのコンテンツ --}}
-    @yield('content')
-
-</main>
-
-
-    {{-- フッター（mt-auto は footer.blade 側にあるのでOK） --}}
+    {{-- フッター --}}
     @include('components.footer')
 
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const savedPosition = sessionStorage.getItem("scrollPosition");
+
+    if (savedPosition !== null) {
+        window.scrollTo(0, parseInt(savedPosition));
+        sessionStorage.removeItem("scrollPosition");
+    }
+
+    // スクロール復元が終わってから表示
+    document.body.classList.remove("opacity-0");
+
+    /*
+    ============================
+    フォーム送信時に保存
+    ============================
+    */
+    document.querySelectorAll("form").forEach(form => {
+        form.addEventListener("submit", function () {
+            sessionStorage.setItem("scrollPosition", window.scrollY);
+        });
+    });
+
+    /*
+    ============================
+    リンククリック時にも保存
+    ============================
+    */
+    document.querySelectorAll("a").forEach(link => {
+        if (link.href && !link.href.startsWith("#")) {
+            link.addEventListener("click", function () {
+                sessionStorage.setItem("scrollPosition", window.scrollY);
+            });
+        }
+    });
+
+});
+</script>
+
+
 </body>
-
-
 </html>

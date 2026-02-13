@@ -77,4 +77,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
     Route::post('/checkout/payment', [CheckoutController::class, 'payment'])->name('checkout.payment');
     Route::post('/checkout/complete', [CheckoutController::class, 'complete'])->name('checkout.complete');
+    Route::post('/stripe/charge', [CheckoutController::class, 'stripeCharge'])
+    ->name('stripe.charge');
 });
