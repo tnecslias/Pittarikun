@@ -24,12 +24,13 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
 
-            // ログインしている場合のみ、そのユーザのカート件数を取得
-            $cartCount = Auth::check()
-                ? CartItem::where('user_id', Auth::id())->count()
-                : 0;
+            $cartCount = 0;
 
-            // 全ビューで使える変数として共有
+            if (Auth::check()) {
+                $cartCount = CartItem::where('user_id', Auth::id())
+                    ->sum('quantity'); // ← count() ではなく sum()
+            }
+
             $view->with('cartCount', $cartCount);
         });
     }
