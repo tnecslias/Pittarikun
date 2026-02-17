@@ -28,7 +28,7 @@
 <div class="fixed top-20 right-6 bg-white border border-gray-300 shadow-lg rounded-xl p-4 text-sm z-40 w-64">
 
     <div class="font-bold mb-1 text-gray-800 text-base">
-        試しアカウント
+        お試しアカウント
     </div>
 
     <div class="mb-1">

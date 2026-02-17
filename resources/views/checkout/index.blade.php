@@ -183,6 +183,15 @@ document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
 // 初期表示時
 window.addEventListener('load', toggleCreditCardForm);
 
+    // ブラウザのスクロール復元を無効
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
+    // ページ表示時にトップへ
+    window.onload = function () {
+        window.scrollTo(0, 0);
+    };
 </script>
 
 </div>

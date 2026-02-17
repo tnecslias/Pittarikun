@@ -13,7 +13,11 @@
         {{-- メニュー --}}
         <div class="flex items-center gap-6 text-sm font-medium">
             <a href="{{ route('home') }}"
-            class="flex items-center gap-1 text-gray-700 hover:text-blue-500 transition">
+            class="flex items-center gap-1 transition
+            {{ request()->routeIs('home')
+                ? 'text-blue-500'
+                : 'text-gray-700 hover:text-blue-500' }}">
+
                 
                 <!-- 検索アイコン -->
                 <svg xmlns="http://www.w3.org/2000/svg"
@@ -33,30 +37,42 @@
 
                 {{-- ログイン --}}
                 <a href="{{ route('login') }}"
-                   class="flex items-center gap-1 text-gray-700 hover:text-blue-500 transition">
+                class="flex items-center gap-1 transition
+                {{ request()->routeIs('login')
+                    ? 'text-blue-500'
+                    : 'text-gray-700 hover:text-blue-500' }}">
+
                     <svg xmlns="http://www.w3.org/2000/svg"
-                         class="w-5 h-5"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor">
+                        class="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15"/>
+                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M18 12h-9m0 0l3-3m-3 3l3 3"/>
+                            d="M18 12h-9m0 0l3-3m-3 3l3 3"/>
                     </svg>
+
                     ログイン
                 </a>
+
 
             @else
 
                 {{-- お気に入り --}}
                 <a href="{{ route('favorites') }}"
-                class="inline-flex items-center gap-1 text-gray-700 hover:text-pink-500 transition leading-none">
+                class="flex items-center gap-1 transition
+                {{ request()->routeIs('favorites')
+                    ? 'text-blue-500'
+                    : 'text-gray-700 hover:text-blue-500' }}">
 
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                        class="w-5 h-5 shrink-0"
-                        viewBox="0 0 24 24"
-                        fill="currentColor">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="w-5 h-5 shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2">
 
                         <path d="M11.645 20.91l-.345.18-.345-.18C5.4 18.01 2 14.85 2 10.5
                                 2 7.42 4.42 5 7.5 5
@@ -72,15 +88,18 @@
 
                 {{-- カート --}}
                 <a href="{{ route('cart.index') }}"
-                   class="relative flex items-center gap-1 text-gray-700 hover:text-blue-500 transition mr-3">
+                class="relative flex items-center gap-1 transition
+                {{ request()->routeIs('cart.*', 'checkout.*')
+                    ? 'text-blue-500'
+                    : 'text-gray-700 hover:text-blue-500' }}">
 
                     <svg xmlns="http://www.w3.org/2000/svg"
-                         class="w-5 h-5"
-                         fill="none"
-                         viewBox="0 0 24 24"
-                         stroke="currentColor">
+                        class="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M2.25 3h1.386a.75.75 0 01.728.564l.803 3.21M7.5 14.25h9.75l3-7.5H6.621m.879 7.5l-.75 3m0 0h11.25m-11.25 0a1.5 1.5 0 11-3 0m14.25 0a1.5 1.5 0 11-3 0"/>
+                            d="M2.25 3h1.386a.75.75 0 01.728.564l.803 3.21M7.5 14.25h9.75l3-7.5H6.621m.879 7.5l-.75 3m0 0h11.25m-11.25 0a1.5 1.5 0 11-3 0m14.25 0a1.5 1.5 0 11-3 0"/>
                     </svg>
 
                     カート
@@ -100,7 +119,11 @@
 
                 {{-- マイページ --}}
                 <a href="{{ route('mypage') }}"
-                   class="flex items-center gap-1 text-gray-700 hover:text-blue-500 transition">
+                   class="flex items-center gap-1 transition
+                    {{ request()->routeIs('mypage')
+                        ? 'text-blue-500'
+                        : 'text-gray-700 hover:text-blue-500' }}">
+
                     <svg xmlns="http://www.w3.org/2000/svg"
                          class="w-5 h-5"
                          fill="none"
@@ -116,22 +139,24 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                            class="flex items-center gap-1 text-gray-700 hover:text-red-500 transition">
+                        onclick="return confirm('ログアウトしますか？')"
+                        class="flex items-center gap-1 text-gray-700 hover:text-red-500 transition">
 
                         <svg xmlns="http://www.w3.org/2000/svg"
-                             class="w-5 h-5"
-                             fill="none"
-                             viewBox="0 0 24 24"
-                             stroke="currentColor">
+                            class="w-5 h-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15"/>
+                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M18 12h-9m0 0l3-3m-3 3l3 3"/>
+                                d="M18 12h-9m0 0l3-3m-3 3l3 3"/>
                         </svg>
 
                         ログアウト
                     </button>
                 </form>
+
 
             @endguest
 
