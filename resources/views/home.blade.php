@@ -15,7 +15,7 @@
             </div>
 
             <div class="relative flex-1 ml-6 sm:ml-10 rounded-2xl border-2 border-gray-400 bg-white p-4 shadow-md">
-                <p class="text-sm font-semibold text-gray-800 mb-3 text-center">ここを測れば、ぴったり収納がすぐ見つかるよ！</p>
+                <p class="text-sm font-semibold text-gray-800 mb-3 text-center">測ったサイズを入力して、ぴったり収納を見つけよう！</p>
                 <svg viewBox="0 0 760 380" class="w-full h-auto" role="img" aria-label="棚の幅、高さ、奥行きの測り方">
                 <defs>
                     <marker id="arrow-end" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
