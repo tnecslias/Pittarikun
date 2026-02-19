@@ -89,7 +89,7 @@
                 {{-- カート --}}
                 <a href="{{ route('cart.index') }}"
                 class="relative flex items-center gap-1 transition
-                {{ request()->routeIs('cart.*', 'checkout.*')
+                {{ request()->routeIs('cart.index', 'checkout.*')
                     ? 'text-blue-500'
                     : 'text-gray-700 hover:text-blue-500' }}">
 
