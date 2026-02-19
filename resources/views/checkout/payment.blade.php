@@ -31,7 +31,7 @@
     </h2>
 
     {{-- メッセージ切り替え --}}
-    <p class="text-gray-600">
+    <p id="paymentMessage" class="text-gray-600">
         @switch($payment_method)
 
             @case('credit_card')
@@ -51,6 +51,8 @@
         @endswitch
     </p>
 
+    <p id="paymentError" class="text-red-600 text-sm mt-3 hidden"></p>
+
     <div class="w-full bg-gray-200 rounded-full h-2 mt-4">
         <div class="bg-blue-500 h-2 rounded-full animate-pulse"
              style="width: 100%">
@@ -64,9 +66,54 @@
 </form>
 
 <script>
-setTimeout(() => {
+const paymentMethod = @json($payment_method);
+const paymentError = document.getElementById('paymentError');
+const paymentMessage = document.getElementById('paymentMessage');
+
+function submitComplete() {
     document.getElementById('completeForm').submit();
-}, 2000);
+}
+
+async function chargeStripe() {
+    try {
+        const response = await fetch(@json(route('stripe.charge')), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': @json(csrf_token()),
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                payment_method: paymentMethod,
+                card_number: @json($card_number),
+                card_expiry: @json($card_expiry),
+                card_cvc: @json($card_cvc),
+            }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || '決済に失敗しました。');
+        }
+
+        if (result.bypassed) {
+            paymentMessage.textContent = '開発モード: 決済をスキップして注文を確定します...';
+        }
+
+        setTimeout(submitComplete, 800);
+    } catch (error) {
+        paymentError.textContent = error.message;
+        paymentError.classList.remove('hidden');
+        paymentMessage.textContent = 'カード決済に失敗しました。内容を確認してください。';
+    }
+}
+
+if (paymentMethod === 'credit_card') {
+    chargeStripe();
+} else {
+    setTimeout(submitComplete, 1200);
+}
 </script>
 
 @endsection

@@ -19,6 +19,9 @@
         <input type="hidden" name="address" value="{{ $address }}">
         <input type="hidden" name="phone" value="{{ $phone }}">
         <input type="hidden" name="payment_method" value="{{ $payment_method }}">
+        <input type="hidden" name="card_number" value="{{ $card_number }}">
+        <input type="hidden" name="card_expiry" value="{{ $card_expiry }}">
+        <input type="hidden" name="card_cvc" value="{{ $card_cvc }}">
 
         {{-- 購入者情報 --}}
         <div class="space-y-3 text-sm">

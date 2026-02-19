@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\User;
+use Stripe\StripeClient;
 
 class CheckoutController extends Controller
 {
@@ -36,8 +37,8 @@ class CheckoutController extends Controller
         return view('checkout.index', [
             'cart_items'     => $cart_items,
             'name'           => old('name', $user->name),
-            'address'        => old('address', $user->address), 
-            'phone'          => old('phone', $user->phone),     
+            'address'        => old('address', $user->address),
+            'phone'          => old('phone', $user->phone),
             'payment_method' => Session::get('payment_method', ''),
         ]);
     }
@@ -55,6 +56,9 @@ class CheckoutController extends Controller
                 'address'        => 'required',
                 'phone'          => 'required',
                 'payment_method' => 'required',
+                'card_number'    => 'nullable|string',
+                'card_expiry'    => 'nullable|string',
+                'card_cvc'       => 'nullable|string',
             ]);
 
             // セッション保存
@@ -72,6 +76,9 @@ class CheckoutController extends Controller
             'address'        => $checkout['address'],
             'phone'          => $checkout['phone'],
             'payment_method' => $checkout['payment_method'],
+            'card_number'    => $checkout['card_number'] ?? '',
+            'card_expiry'    => $checkout['card_expiry'] ?? '',
+            'card_cvc'       => $checkout['card_cvc'] ?? '',
             'cart_items'     => CartItem::where('user_id', Auth::id())
                                 ->with('storage')
                                 ->get(),
@@ -89,13 +96,145 @@ class CheckoutController extends Controller
             'address'        => 'required',
             'phone'          => 'required',
             'payment_method' => 'required',
+            'card_number'    => 'nullable|string',
+            'card_expiry'    => 'nullable|string',
+            'card_cvc'       => 'nullable|string',
         ]);
 
         Session::put('checkout', $data);
+        Session::forget(['stripe_paid', 'stripe_payment_intent_id']);
+
+        if ($data['payment_method'] === 'credit_card') {
+            // 同一注文の重複課金を防ぐため、画面遷移ごとに1つのキーを払い出す
+            Session::put('stripe_idempotency_key', (string) Str::uuid());
+        } else {
+            Session::forget('stripe_idempotency_key');
+        }
 
         return view('checkout.payment', [
-            'payment_method' => $data['payment_method']
+            'payment_method' => $data['payment_method'],
+            'card_number'    => $data['card_number'] ?? '',
+            'card_expiry'    => $data['card_expiry'] ?? '',
+            'card_cvc'       => $data['card_cvc'] ?? '',
         ]);
+    }
+
+
+    /**
+     * Stripeカード決済
+     */
+    public function stripeCharge(Request $request)
+    {
+        $request->validate([
+            'payment_method' => 'required|string',
+            'card_number'    => 'nullable|string',
+            'card_expiry'    => 'nullable|string',
+            'card_cvc'       => 'nullable|string',
+        ]);
+
+        if ($request->payment_method !== 'credit_card') {
+            return response()->json(['success' => true]);
+        }
+
+        if (Session::get('stripe_paid') && Session::get('stripe_payment_intent_id')) {
+            return response()->json([
+                'success' => true,
+                'payment_intent_id' => Session::get('stripe_payment_intent_id'),
+                'already_paid' => true,
+            ]);
+        }
+
+        $checkout = Session::get('checkout');
+        if (!$checkout) {
+            return response()->json([
+                'success' => false,
+                'message' => 'セッションが切れています。最初からやり直してください。',
+            ], 422);
+        }
+
+        $bypassed = false;
+        $intentPayload = [
+            'amount' => $this->calculateCartTotal(),
+            'currency' => 'jpy',
+            'confirm' => true,
+            'automatic_payment_methods' => [
+                'enabled' => true,
+                'allow_redirects' => 'never',
+            ],
+            'description' => 'Order for user #' . Auth::id(),
+        ];
+
+        if ($this->canBypassCardValidation()) {
+            $bypassed = true;
+            // 開発モードでは入力値を無視し、Stripe提供のテストPaymentMethodを使用
+            $intentPayload['payment_method'] = 'pm_card_visa';
+        } else {
+            $cardNumber = preg_replace('/\D+/', '', (string) $request->card_number);
+            $exp = explode('/', (string) $request->card_expiry);
+            $expMonth = isset($exp[0]) ? (int) trim($exp[0]) : 0;
+            $expYear  = isset($exp[1]) ? (int) trim($exp[1]) : 0;
+            if ($expYear > 0 && $expYear < 100) {
+                $expYear += 2000;
+            }
+            $cardCvc = (string) $request->card_cvc;
+
+            if (!$cardNumber || $expMonth < 1 || $expMonth > 12 || $expYear < (int) date('Y') || !$cardCvc) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'カード情報の形式が正しくありません。',
+                ], 422);
+            }
+
+            $intentPayload['payment_method_data'] = [
+                'type' => 'card',
+                'card' => [
+                    'number' => $cardNumber,
+                    'exp_month' => $expMonth,
+                    'exp_year' => $expYear,
+                    'cvc' => $cardCvc,
+                ],
+                'billing_details' => [
+                    'name' => $checkout['name'],
+                ],
+            ];
+        }
+
+        $secret = (string) config('services.stripe.secret');
+        if ($secret === '') {
+            return response()->json([
+                'success' => false,
+                'message' => 'STRIPE_SECRET が未設定です。',
+            ], 500);
+        }
+
+        try {
+            $stripe = new StripeClient($secret);
+
+            $intent = $stripe->paymentIntents->create($intentPayload, [
+                'idempotency_key' => Session::get('stripe_idempotency_key') ?? (string) Str::uuid(),
+            ]);
+
+            if ($intent->status !== 'succeeded') {
+                return response()->json([
+                    'success' => false,
+                    'message' => '決済が完了しませんでした。ステータス: ' . $intent->status,
+                ], 422);
+            }
+
+            Session::put('stripe_paid', true);
+            Session::put('stripe_payment_intent_id', $intent->id);
+
+            return response()->json([
+                'success' => true,
+                'payment_intent_id' => $intent->id,
+                'bypassed' => $bypassed,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
 
@@ -108,6 +247,10 @@ class CheckoutController extends Controller
 
         if (!$checkout) {
             return redirect()->route('cart.index');
+        }
+
+        if (($checkout['payment_method'] ?? '') === 'credit_card' && !Session::get('stripe_paid')) {
+            return redirect()->route('checkout.index')->with('error', 'カード決済が完了していません。');
         }
 
         $user = Auth::user();
@@ -125,11 +268,7 @@ class CheckoutController extends Controller
         }
 
         // 合計計算
-        $total = 0;
-
-        foreach ($cart_items as $item) {
-            $total += $item->storage->price * $item->quantity;
-        }
+        $total = $this->calculateCartTotal();
 
 
         /*
@@ -188,8 +327,32 @@ class CheckoutController extends Controller
         |--------------------------------------------------------------------------
         */
         Session::forget('checkout');
+        Session::forget('stripe_paid');
+        Session::forget('stripe_payment_intent_id');
+        Session::forget('stripe_idempotency_key');
 
 
         return view('checkout.complete');
+    }
+
+    private function calculateCartTotal(): int
+    {
+        $total = 0;
+        $items = CartItem::where('user_id', Auth::id())->with('storage')->get();
+
+        foreach ($items as $item) {
+            if (!$item->storage) {
+                continue;
+            }
+            $total += $item->storage->price * $item->quantity;
+        }
+
+        return $total;
+    }
+
+    private function canBypassCardValidation(): bool
+    {
+        return (bool) config('services.stripe.allow_any_card', false)
+            && app()->environment(['local', 'testing']);
     }
 }
