@@ -9,7 +9,7 @@
     <div class="w-full max-w-2xl mb-6">
         <div class="flex items-stretch gap-3 sm:gap-4">
             <div class="shrink-0 self-stretch -ml-2 sm:-ml-3">
-                <img src="{{ asset('images/pittari-guide.png') }}"
+                <img src="{{ asset('images/pittari-guide.before-bg-clear.png') }}"
                      alt="ぴったりくん"
                      class="h-full w-auto max-w-[220px] object-contain">
             </div>
