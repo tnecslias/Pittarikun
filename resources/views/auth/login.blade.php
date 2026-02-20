@@ -3,9 +3,9 @@
 @section('title', 'ログイン')
 
 @section('content')
-<div class="container mx-auto flex justify-center items-center min-h-[60vh]">
+<div class="w-full max-w-5xl mx-auto flex justify-center items-center min-h-[60vh]">
 
-    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8">
+    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-5 sm:p-8">
 
         <h2 class="text-xl font-semibold mb-4 text-center">
             @if(request()->routeIs('login')) ログイン @else 新規登録 @endif
@@ -25,7 +25,7 @@
 
         {{-- ▼ 試しアカウント表示（ログイン時のみ） --}}
 @if(request()->routeIs('login'))
-<div class="fixed top-20 right-6 bg-white border border-gray-300 shadow-lg rounded-xl p-4 text-sm z-40 w-64">
+<div class="fixed left-4 right-4 bottom-4 md:left-auto md:right-6 md:bottom-auto md:top-20 bg-white border border-gray-300 shadow-lg rounded-xl p-4 text-sm z-40 md:w-64">
 
     <div class="font-bold mb-1 text-gray-800 text-base">
         お試しアカウント

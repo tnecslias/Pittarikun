@@ -11,7 +11,7 @@
     </h2>
 
     {{-- ユーザー情報 --}}
-    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8 mb-6">
+    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-5 sm:p-8 mb-6">
         <p><strong>名前：</strong> {{ $user->name }}</p>
         <p><strong>メール：</strong> {{ $user->email }}</p>
         <p>
@@ -34,7 +34,7 @@
     </div>
 
     {{-- 注文履歴 --}}
-    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8">
+    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-5 sm:p-8">
 
         <h3 class="text-xl font-bold mb-4">
             注文履歴
@@ -53,7 +53,7 @@
                 <div class="border rounded-lg p-4 mb-4">
 
                     {{-- 注文ヘッダー --}}
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2">
 
                         <div>
                             <p class="font-bold">
@@ -65,7 +65,7 @@
                             </p>
                         </div>
 
-                        <div class="text-right font-bold text-lg">
+                        <div class="sm:text-right font-bold text-lg">
                             ¥{{ number_format($order->total_price) }}
                         </div>
 
@@ -97,7 +97,7 @@
 
                         @foreach($order->items as $item)
 
-                            <div class="flex justify-between">
+                            <div class="flex flex-col sm:flex-row sm:justify-between gap-1">
 
                                 <span>
                                     {{ $item->storage->name }}

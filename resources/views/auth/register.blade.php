@@ -3,9 +3,9 @@
 @section('title', '新規登録')
 
 @section('content')
-    <div class="container mx-auto flex justify-center items-center min-h-[60vh]">
+    <div class="w-full max-w-5xl mx-auto flex justify-center items-center min-h-[60vh]">
 
-        <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8">
+        <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-5 sm:p-8">
             <h2 class="text-xl font-semibold mb-4 text-center">
                 @if(request()->routeIs('login')) ログイン @else 新規登録 @endif
             </h2>

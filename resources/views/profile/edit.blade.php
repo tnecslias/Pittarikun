@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="flex justify-center">
-    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8">
+    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-5 sm:p-8">
 
         <h2 class="text-2xl font-bold mb-6 text-center">
             プロフィール編集
@@ -103,7 +103,7 @@
 
 
             {{-- ボタン --}}
-            <div class="flex justify-between items-center">
+            <div class="flex flex-col-reverse sm:flex-row justify-between sm:items-center gap-3">
                 <a href="{{ route('mypage') }}"
                    class="text-gray-600 hover:underline">
                     マイページに戻る

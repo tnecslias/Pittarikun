@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="max-w-lg mx-auto bg-white p-6 rounded-xl shadow text-center">
+<div class="w-full max-w-lg mx-auto bg-white p-4 sm:p-6 rounded-xl shadow text-center">
 
     {{-- アイコン切り替え --}}
     <div class="text-5xl mb-4 animate-pulse">

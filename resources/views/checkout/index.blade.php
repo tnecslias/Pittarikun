@@ -3,7 +3,7 @@
 @section('title', '注文内容確認')
 
 @section('content')
-<div class="max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
+<div class="w-full max-w-lg mx-auto bg-white p-4 sm:p-6 rounded-xl shadow">
 
     <h2 class="text-xl font-bold mb-4 text-center">
         注文内容の確認
@@ -55,7 +55,7 @@
                         $total += $subtotal;
                     @endphp
 
-                    <div class="flex justify-between items-center border-b pb-2">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 border-b pb-2">
                         <div>
                             <p class="font-semibold">{{ $item->storage->name }}</p>
                             <p class="text-gray-500 text-xs">
@@ -147,7 +147,7 @@
         </div>
 
         {{-- ボタン --}}
-        <div class="mt-6 flex gap-3">
+        <div class="mt-6 flex flex-col-reverse sm:flex-row gap-3">
             <button type="submit"
                 class="flex-[3] bg-blue-500 text-white py-2 rounded-lg">
                 注文内容の確認

@@ -7,14 +7,14 @@
 
 
     <div class="w-full max-w-2xl mb-6">
-        <div class="flex items-stretch gap-3 sm:gap-4">
-            <div class="shrink-0 self-stretch -ml-2 sm:-ml-3">
+        <div class="flex flex-col sm:flex-row items-center sm:items-stretch gap-3 sm:gap-4">
+            <div class="shrink-0 self-center sm:self-stretch">
                 <img src="{{ asset('images/pittari-guide.before-bg-clear.png') }}"
                      alt="ぴったりくん"
-                     class="h-full w-auto max-w-[220px] object-contain">
+                     class="h-auto w-auto max-w-[160px] sm:max-w-[220px] object-contain">
             </div>
 
-            <div class="relative flex-1 ml-6 sm:ml-10 rounded-2xl border-2 border-gray-400 bg-white p-4 shadow-md">
+            <div class="relative flex-1 w-full sm:ml-10 rounded-2xl border-2 border-gray-400 bg-white p-4 shadow-md">
                 <p class="text-sm font-semibold text-gray-800 mb-3 text-center">測ったサイズを入力して、ぴったり収納を見つけよう！</p>
                 <svg viewBox="0 0 760 380" class="w-full h-auto" role="img" aria-label="棚の幅、高さ、奥行きの測り方">
                 <defs>
@@ -56,8 +56,8 @@
                     marker-start="url(#arrow-start)" marker-end="url(#arrow-end)"></line>
                 <text x="688" y="72" text-anchor="middle" fill="#1E40AF" font-size="18" font-weight="700">奥行き</text>
                 </svg>
-                <div class="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] bg-white"></div>
-                <svg class="absolute left-0 top-1/2 -translate-x-[14px] -translate-y-1/2" width="14" height="24" viewBox="0 0 14 24" aria-hidden="true">
+                <div class="hidden sm:block absolute left-0 top-1/2 -translate-y-1/2 h-7 w-[3px] bg-white"></div>
+                <svg class="hidden sm:block absolute left-0 top-1/2 -translate-x-[14px] -translate-y-1/2" width="14" height="24" viewBox="0 0 14 24" aria-hidden="true">
                     <polygon points="14,1 1,12 14,23" fill="#FFFFFF"></polygon>
                     <line x1="14" y1="1" x2="1" y2="12" stroke="#9CA3AF" stroke-width="2"></line>
                     <line x1="1" y1="12" x2="14" y2="23" stroke="#9CA3AF" stroke-width="2"></line>
@@ -67,7 +67,7 @@
     </div>
 
     {{-- ========= 入力フォーム========= --}}
-    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-8">
+    <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-5 sm:p-8">
         {{-- 検索フォーム --}}
         <form method="GET" action="{{ route('storage.search') }}" class="space-y-4">
             <div>
@@ -103,7 +103,7 @@
 
 @isset($storages)
 
-    <div class="mt-20 grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+    <div class="mt-20 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full">
 
         @forelse($storages as $s)
 

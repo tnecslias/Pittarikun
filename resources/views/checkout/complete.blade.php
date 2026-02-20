@@ -3,7 +3,7 @@
 @section('title', '注文完了')
 
 @section('content')
-<div class="max-w-md mx-auto bg-white p-6 rounded-xl shadow text-center">
+<div class="w-full max-w-md mx-auto bg-white p-4 sm:p-6 rounded-xl shadow text-center">
 
     <h2 class="text-2xl font-bold text-black mb-4">
         ご注文ありがとうございました！

@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="max-w-lg mx-auto bg-white p-6 rounded-xl shadow">
+<div class="w-full max-w-lg mx-auto bg-white p-4 sm:p-6 rounded-xl shadow">
 
     <h2 class="text-xl font-bold mb-4 text-center">
         注文内容の確認
@@ -64,7 +64,7 @@
                         $total += $subtotal;
                     @endphp
 
-                    <div class="flex justify-between border-b pb-2">
+                    <div class="flex flex-col sm:flex-row sm:justify-between gap-2 border-b pb-2">
 
                         <div>
                             <p class="font-semibold">
@@ -125,7 +125,7 @@
         </div>
 
         {{-- ボタン --}}
-<div class="mt-6 flex gap-3">
+<div class="mt-6 flex flex-col-reverse sm:flex-row gap-3">
 
     <button type="submit"
         class="flex-[3] bg-blue-500 text-white py-2 rounded-lg">
