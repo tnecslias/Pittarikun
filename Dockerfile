@@ -15,12 +15,14 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         git \
+        libcurl4-openssl-dev \
+        libicu-dev \
         libonig-dev \
         libpq-dev \
         libxml2-dev \
         libzip-dev \
         unzip \
-    && docker-php-ext-install mbstring pdo_pgsql xml zip \
+    && docker-php-ext-install bcmath curl intl mbstring pdo_pgsql xml zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
