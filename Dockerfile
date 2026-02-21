@@ -11,6 +11,9 @@ RUN npm run build
 
 FROM php:8.2-apache
 
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
@@ -37,7 +40,8 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-scripts
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-scripts --no-plugins -vvv \
+    || composer install --no-dev --prefer-source --no-interaction --optimize-autoloader --no-scripts --no-plugins -vvv
 
 COPY . .
 COPY --from=assets /app/public/build ./public/build
