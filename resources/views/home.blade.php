@@ -7,8 +7,8 @@
 
 
     <div class="w-full max-w-2xl mb-6">
-        <div class="flex flex-col sm:flex-row items-center sm:items-stretch gap-3 sm:gap-4">
-            <div class="shrink-0 self-center sm:self-stretch">
+        <div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+            <div class="shrink-0 self-center">
                 <img src="{{ asset('images/pittari-guide.before-bg-clear.png') }}"
                      alt="ぴったりくん"
                      class="h-auto w-auto max-w-[160px] sm:max-w-[220px] object-contain">
