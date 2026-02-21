@@ -40,8 +40,8 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer config -g github-protocols git \
-    && composer install --no-dev --prefer-source --no-interaction --optimize-autoloader --no-scripts --no-plugins -vvv
+RUN composer config -g github-protocols https \
+    && composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-scripts --no-plugins -vvv
 
 COPY . .
 COPY --from=assets /app/public/build ./public/build
