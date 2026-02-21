@@ -33,6 +33,8 @@ services:
         sync: false
       - key: STRIPE_SECRET
         sync: false
+      - key: GITHUB_TOKEN
+        sync: false
       - key: STRIPE_ALLOW_ANY_CARD
         value: "false"
 
