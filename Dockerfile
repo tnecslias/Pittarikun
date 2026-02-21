@@ -1,16 +1,26 @@
 # syntax=docker/dockerfile:1
+
+FROM node:22-bookworm-slim AS assets
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.js postcss.config.js tailwind.config.js ./
+RUN npm run build
+
 FROM php:8.2-apache
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         git \
+        libonig-dev \
         libpq-dev \
+        libxml2-dev \
         libzip-dev \
-        nodejs \
-        npm \
         unzip \
-    && docker-php-ext-install pdo_pgsql zip \
+    && docker-php-ext-install mbstring pdo_pgsql xml zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
@@ -24,11 +34,13 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
 
 WORKDIR /var/www/html
 
-COPY . .
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-scripts
 
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader \
-    && npm ci \
-    && npm run build \
+COPY . .
+COPY --from=assets /app/public/build ./public/build
+
+RUN php artisan package:discover --ansi \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R ug+rwx storage bootstrap/cache
 
