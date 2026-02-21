@@ -64,9 +64,11 @@ class StorageController extends Controller
     {
         // 初期化
         $storage->fit_count = 0;
+        $storage->perfect_fit_count = 0;
 
         $storage->remaining_width = 0;
         $storage->remaining_height = 0;
+        $storage->remaining_depth = 0;
 
 
         // 幅計算
@@ -77,6 +79,10 @@ class StorageController extends Controller
 
             $storage->remaining_width =
                 $spaceWidth % $storage->width;
+
+            if ($storage->remaining_width === 0) {
+                $storage->perfect_fit_count++;
+            }
         }
 
 
@@ -90,6 +96,10 @@ if ($request->filled('height') && $storage->height > 0)
         $storage->remaining_height =
             $spaceHeight - $storage->height;
 
+        if ($storage->remaining_height === 0) {
+            $storage->perfect_fit_count++;
+        }
+
     } else {
 
         // 入らない場合
@@ -97,13 +107,62 @@ if ($request->filled('height') && $storage->height > 0)
 
     }
 }
-    }
-        if ($request->filled('width')) {
 
-        $storages = $storages->sortBy([
-            fn ($s) => $s->remaining_width === 0 ? 0 : 1, 
-            fn ($s) => $s->remaining_width ?? 9999,       
-        ])->values();
+// 奥行き（ケース1個で計算）
+if ($request->filled('depth') && $storage->depth > 0)
+{
+    $spaceDepth = (int)$request->depth;
+
+    if ($spaceDepth >= $storage->depth) {
+
+        $storage->remaining_depth =
+            $spaceDepth - $storage->depth;
+
+        if ($storage->remaining_depth === 0) {
+            $storage->perfect_fit_count++;
+        }
+
+    } else {
+
+        // 入らない場合
+        $storage->remaining_depth = null;
+
+    }
+}
+    }
+
+    if ($request->filled('width') || $request->filled('height') || $request->filled('depth')) {
+        $storages = $storages->sort(function ($a, $b) use ($request) {
+            // 1) ぴったり一致数が多い順
+            $cmp = $b->perfect_fit_count <=> $a->perfect_fit_count;
+            if ($cmp !== 0) {
+                return $cmp;
+            }
+
+            // 2) 同数の場合は各残り値でタイブレーク（小さい順）
+            if ($request->filled('width')) {
+                $cmp = ($a->remaining_width ?? 9999) <=> ($b->remaining_width ?? 9999);
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+            }
+
+            if ($request->filled('depth')) {
+                $cmp = ($a->remaining_depth ?? 9999) <=> ($b->remaining_depth ?? 9999);
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+            }
+
+            if ($request->filled('height')) {
+                $cmp = ($a->remaining_height ?? 9999) <=> ($b->remaining_height ?? 9999);
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+            }
+
+            return 0;
+        })->values();
     }
 
 

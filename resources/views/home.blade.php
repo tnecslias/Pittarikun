@@ -69,7 +69,7 @@
     {{-- ========= 入力フォーム========= --}}
     <div class="w-full max-w-lg bg-white shadow-lg rounded-xl p-5 sm:p-8">
         {{-- 検索フォーム --}}
-        <form method="GET" action="{{ route('storage.search') }}" class="space-y-4">
+        <form method="GET" action="{{ route('storage.search') }}" class="space-y-4" data-scroll-target="search-results">
             <div>
                 <label class="block mb-1 font-medium text-gray-700">幅 (cm)</label>
                 <input type="number" name="width" placeholder="例: 50"
@@ -95,6 +95,9 @@
                     class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg shadow">
                 検索
             </button>
+            <p class="text-[11px] sm:text-xs text-gray-500 text-center">
+                ※幅・高さ・奥行きは、1項目だけでも検索できます
+            </p>
         </form>
 
     </div> 
@@ -103,7 +106,23 @@
 
 @isset($storages)
 
-    <div class="mt-20 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full">
+    @php
+        $hasSearchCondition = request()->filled('width') || request()->filled('height') || request()->filled('depth');
+    @endphp
+
+    <div id="search-results">
+        <div class="mt-12 mb-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-sky-50 via-white to-blue-50 px-4 py-5 sm:px-6 sm:py-6 shadow-sm">
+            <div class="flex flex-col items-center text-center">
+                <p class="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+                    {{ $hasSearchCondition ? 'ぴったり収納はこちら！' : '取扱商品一覧はこちら！' }}
+                </p>
+                <p class="mt-1 text-[11px] sm:text-sm text-gray-600">
+                    {{ $hasSearchCondition ? '入力サイズに合う候補を、おすすめ順に表示しています。' : '収納ケースを一覧でチェックできます。' }}
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-20 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 w-full">
 
         @forelse($storages as $s)
 
@@ -223,20 +242,30 @@
     <p class="text-gray-600 mt-1 text-sm text-center">
         ¥{{ number_format($s->price) }}
     </p>
-<div class="mt-2 flex flex-wrap gap-2 justify-center">
+@php
+    $hasWidthLabel = request()->filled('width');
+    $hasHeightLabel = request()->filled('height');
+    $hasDepthLabel = request()->filled('depth');
+    $labelCount = ($hasWidthLabel ? 1 : 0) + ($hasHeightLabel ? 1 : 0) + ($hasDepthLabel ? 1 : 0);
+@endphp
 
-@if(request('width') && isset($s->fit_count) && $s->fit_count >= 1)
+@if($labelCount > 0)
+<div @class([
+    'mt-2 grid gap-1 items-stretch mx-auto',
+    'grid-cols-1 w-full max-w-[140px]' => $labelCount === 1,
+    'grid-cols-2 w-full max-w-[280px]' => $labelCount === 2,
+    'grid-cols-3 w-full' => $labelCount === 3,
+])>
 
+@if($hasWidthLabel && isset($s->remaining_width))
 <span @class([
-    'width-label px-3 py-1 text-xs font-bold rounded-full',
+    'width-label h-6 px-1 py-1 text-[10px] leading-none font-bold rounded-full text-center whitespace-nowrap flex items-center justify-center',
     'bg-green-100 text-green-700' => $s->remaining_width == 0,
     'bg-gray-100 text-gray-700' => $s->remaining_width > 0,
     'bg-red-100 text-red-700' => $s->remaining_width < 0,
 ])
 data-storage-width="{{ request('width') }}"
 data-case-width="{{ $s->width }}">
-
-
     @if($s->remaining_width == 0)
         幅：ぴったり！
     @elseif($s->remaining_width > 0)
@@ -244,29 +273,47 @@ data-case-width="{{ $s->width }}">
     @else
         幅：オーバー{{ abs($s->remaining_width) }}cm
     @endif
-
 </span>
-
 @endif
 
-
-
 {{-- 高さ --}}
-@if(request('height') && isset($s->remaining_height))
-
-    @if($s->remaining_height == 0)
-        <span class="px-3 py-1 text-xs font-bold bg-green-100 text-green-700 rounded-full">
+@if($hasHeightLabel && isset($s->remaining_height))
+    <span @class([
+        'h-6 px-1 py-1 text-[10px] leading-none font-bold rounded-full text-center whitespace-nowrap flex items-center justify-center',
+        'bg-green-100 text-green-700' => $s->remaining_height == 0,
+        'bg-gray-100 text-gray-700' => $s->remaining_height > 0,
+        'bg-red-100 text-red-700' => $s->remaining_height < 0,
+    ])>
+        @if($s->remaining_height == 0)
             高さ：ぴったり！
-        </span>
-    @else
-        <span class="px-3 py-1 text-xs font-bold bg-gray-100 text-gray-700 rounded-full">
+        @elseif($s->remaining_height > 0)
             高さ：残り{{ $s->remaining_height }}cm
-        </span>
-    @endif
+        @else
+            高さ：オーバー{{ abs($s->remaining_height) }}cm
+        @endif
+    </span>
+@endif
 
+{{-- 奥行き --}}
+@if($hasDepthLabel && isset($s->remaining_depth))
+    <span @class([
+        'h-6 px-1 py-1 text-[10px] leading-none font-bold rounded-full text-center whitespace-nowrap flex items-center justify-center',
+        'bg-green-100 text-green-700' => $s->remaining_depth == 0,
+        'bg-gray-100 text-gray-700' => $s->remaining_depth > 0,
+        'bg-red-100 text-red-700' => $s->remaining_depth < 0,
+    ])>
+        @if($s->remaining_depth == 0)
+            奥行き：ぴったり！
+        @elseif($s->remaining_depth > 0)
+            奥行き：残り{{ $s->remaining_depth }}cm
+        @else
+            奥行き：オーバー{{ abs($s->remaining_depth) }}cm
+        @endif
+    </span>
 @endif
 
 </div>
+@endif
 
 
 
@@ -350,6 +397,7 @@ data-case-width="{{ $s->width }}">
         @endforelse
 
         
+        </div>
     </div>
 @endisset
 
@@ -382,19 +430,19 @@ document.addEventListener("DOMContentLoaded", function(){
 
                 label.textContent = "幅：ぴったり！";
                 label.className =
-                    "width-label px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700";
+                    "width-label h-6 px-1 py-1 text-[10px] leading-none font-bold rounded-full text-center whitespace-nowrap flex items-center justify-center bg-green-100 text-green-700";
 
             } else if (remaining > 0) {
 
                 label.textContent = "幅：残り" + remaining + "cm";
                 label.className =
-                    "width-label px-3 py-1 text-xs font-bold rounded-full bg-gray-100 text-gray-700";
+                    "width-label h-6 px-1 py-1 text-[10px] leading-none font-bold rounded-full text-center whitespace-nowrap flex items-center justify-center bg-gray-100 text-gray-700";
 
             } else {
 
                 label.textContent = "幅：オーバー" + Math.abs(remaining) + "cm";
                 label.className =
-                    "width-label px-3 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700";
+                    "width-label h-6 px-1 py-1 text-[10px] leading-none font-bold rounded-full text-center whitespace-nowrap flex items-center justify-center bg-red-100 text-red-700";
             }
         }
 

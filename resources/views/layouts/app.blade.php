@@ -75,14 +75,37 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     const savedPosition = sessionStorage.getItem("scrollPosition");
+    const scrollToId = sessionStorage.getItem("scrollToId");
 
-    if (savedPosition !== null) {
+    if (scrollToId) {
+        // 先に表示して、スクロールアニメーションが見えるようにする
+        document.body.classList.remove("opacity-0");
+
+        const target = document.getElementById(scrollToId);
+
+        if (target) {
+            const headerOffset = 96;
+            const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+            requestAnimationFrame(() => {
+                window.scrollTo({
+                    top: Math.max(0, top),
+                    behavior: "smooth",
+                });
+            });
+        }
+
+        sessionStorage.removeItem("scrollToId");
+        sessionStorage.removeItem("scrollPosition");
+    } else {
+        // 通常復元は従来通り即時
+        if (savedPosition !== null) {
         window.scrollTo(0, parseInt(savedPosition));
         sessionStorage.removeItem("scrollPosition");
-    }
+        }
 
-    // スクロール復元が終わってから表示
-    document.body.classList.remove("opacity-0");
+        document.body.classList.remove("opacity-0");
+    }
 
     /*
     ============================
@@ -91,6 +114,14 @@ document.addEventListener("DOMContentLoaded", function () {
     */
     document.querySelectorAll("form").forEach(form => {
         form.addEventListener("submit", function () {
+            const targetId = form.dataset.scrollTarget;
+
+            if (targetId) {
+                sessionStorage.setItem("scrollToId", targetId);
+                sessionStorage.removeItem("scrollPosition");
+                return;
+            }
+
             sessionStorage.setItem("scrollPosition", window.scrollY);
         });
     });

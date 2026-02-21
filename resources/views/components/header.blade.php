@@ -14,7 +14,7 @@
         <div class="hidden md:flex items-center gap-6 text-sm font-medium">
             <a href="{{ route('home') }}"
             class="flex items-center gap-1 transition
-            {{ request()->routeIs('home')
+            {{ request()->routeIs('home', 'storage.search')
                 ? 'text-blue-500'
                 : 'text-gray-700 hover:text-blue-500' }}">
 
@@ -190,7 +190,7 @@
         <div class="px-4 py-3 space-y-3 text-sm font-medium">
             <a href="{{ route('home') }}"
                @click="open = false"
-               class="block {{ request()->routeIs('home') ? 'text-blue-500' : 'text-gray-700 hover:text-blue-500' }}">
+               class="block {{ request()->routeIs('home', 'storage.search') ? 'text-blue-500' : 'text-gray-700 hover:text-blue-500' }}">
                 検索
             </a>
 
