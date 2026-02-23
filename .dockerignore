@@ -8,3 +8,4 @@ storage/logs
 !.env.example
 README.md
 tests
+database/*.sqlite
