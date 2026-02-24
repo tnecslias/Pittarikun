@@ -1,6 +1,6 @@
 # 本番公開手順（Render）
 
-このプロジェクトは `render.yaml` を使って、Webサービス + PostgreSQL を自動作成できます。
+このプロジェクトは `render.yaml` を使って、Webサービスを作成できます（DB は外部 MySQL を利用）。
 
 ## 1. GitHub に push
 
@@ -19,13 +19,14 @@ git push
 
 作成されるもの:
 - Web: `pittarikun`
-- DB: `pittarikun-db` (PostgreSQL)
 
 ## 3. 初回デプロイ後に環境変数を設定
 
 `pittarikun` サービスの `Environment` で以下を設定:
 
 - `APP_URL`: Render が発行した本番URL（例: `https://pittarikun.onrender.com`）
+- `DB_CONNECTION`: `mysql`
+- `DB_URL`: MySQL 接続文字列（例: `mysql://USER:PASSWORD@HOST:3306/DB_NAME`）
 - `STRIPE_PUBLISHABLE_KEY`: Stripe公開キー
 - `STRIPE_SECRET`: Stripe秘密キー
 

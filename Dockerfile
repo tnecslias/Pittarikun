@@ -25,7 +25,7 @@ RUN apt-get update \
         libxml2-dev \
         libzip-dev \
         unzip \
-    && docker-php-ext-install bcmath curl intl mbstring pdo_pgsql xml zip \
+    && docker-php-ext-install bcmath curl intl mbstring pdo_mysql pdo_pgsql xml zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
