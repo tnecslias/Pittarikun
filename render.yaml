@@ -18,9 +18,11 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: DB_CONNECTION
-        value: mysql
+        value: pgsql
       - key: DB_URL
-        sync: false
+        fromDatabase:
+          name: pittarikun-db
+          property: connectionString
       - key: SESSION_DRIVER
         value: database
       - key: CACHE_STORE
@@ -35,3 +37,8 @@ services:
         sync: false
       - key: STRIPE_ALLOW_ANY_CARD
         value: "false"
+
+databases:
+  - name: pittarikun-db
+    databaseName: pittarikun
+    user: pittarikun
