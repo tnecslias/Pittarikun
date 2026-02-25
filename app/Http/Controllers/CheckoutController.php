@@ -112,10 +112,12 @@ class CheckoutController extends Controller
         }
 
         return view('checkout.payment', [
-            'payment_method' => $data['payment_method'],
-            'card_number'    => $data['card_number'] ?? '',
-            'card_expiry'    => $data['card_expiry'] ?? '',
-            'card_cvc'       => $data['card_cvc'] ?? '',
+            'payment_method'              => $data['payment_method'],
+            'card_number'                 => $data['card_number'] ?? '',
+            'card_expiry'                 => $data['card_expiry'] ?? '',
+            'card_cvc'                    => $data['card_cvc'] ?? '',
+            'stripe_publishable_key'      => (string) config('services.stripe.publishable_key', ''),
+            'can_bypass_card_validation'  => $this->canBypassCardValidation(),
         ]);
     }
 
@@ -127,9 +129,7 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'payment_method' => 'required|string',
-            'card_number'    => 'nullable|string',
-            'card_expiry'    => 'nullable|string',
-            'card_cvc'       => 'nullable|string',
+            'stripe_token'   => 'nullable|string',
         ]);
 
         if ($request->payment_method !== 'credit_card') {
@@ -169,34 +169,13 @@ class CheckoutController extends Controller
             // 開発モードでは入力値を無視し、Stripe提供のテストPaymentMethodを使用
             $intentPayload['payment_method'] = 'pm_card_visa';
         } else {
-            $cardNumber = preg_replace('/\D+/', '', (string) $request->card_number);
-            $exp = explode('/', (string) $request->card_expiry);
-            $expMonth = isset($exp[0]) ? (int) trim($exp[0]) : 0;
-            $expYear  = isset($exp[1]) ? (int) trim($exp[1]) : 0;
-            if ($expYear > 0 && $expYear < 100) {
-                $expYear += 2000;
-            }
-            $cardCvc = (string) $request->card_cvc;
-
-            if (!$cardNumber || $expMonth < 1 || $expMonth > 12 || $expYear < (int) date('Y') || !$cardCvc) {
+            $stripeToken = trim((string) $request->input('stripe_token', ''));
+            if ($stripeToken === '') {
                 return response()->json([
                     'success' => false,
-                    'message' => $this->invalidCardInputMessage(),
+                    'message' => 'カード情報の送信に失敗しました。もう一度お試しください。',
                 ], 422);
             }
-
-            $intentPayload['payment_method_data'] = [
-                'type' => 'card',
-                'card' => [
-                    'number' => $cardNumber,
-                    'exp_month' => $expMonth,
-                    'exp_year' => $expYear,
-                    'cvc' => $cardCvc,
-                ],
-                'billing_details' => [
-                    'name' => $checkout['name'],
-                ],
-            ];
         }
 
         $secret = (string) config('services.stripe.secret');
@@ -209,6 +188,20 @@ class CheckoutController extends Controller
 
         try {
             $stripe = new StripeClient($secret);
+
+            if (!$this->canBypassCardValidation()) {
+                $paymentMethod = $stripe->paymentMethods->create([
+                    'type' => 'card',
+                    'card' => [
+                        'token' => $stripeToken,
+                    ],
+                    'billing_details' => [
+                        'name' => $checkout['name'],
+                    ],
+                ]);
+
+                $intentPayload['payment_method'] = $paymentMethod->id;
+            }
 
             $intent = $stripe->paymentIntents->create($intentPayload, [
                 'idempotency_key' => Session::get('stripe_idempotency_key') ?? (string) Str::uuid(),
@@ -368,12 +361,4 @@ class CheckoutController extends Controller
         return str_starts_with($secret, 'sk_test_');
     }
 
-    private function invalidCardInputMessage(): string
-    {
-        if ($this->isStripeTestMode() && !$this->canBypassCardValidation()) {
-            return 'カード情報の形式が正しくありません。テスト環境では Stripe テストカード（例: 4242 4242 4242 4242）を使用してください。';
-        }
-
-        return 'カード情報の形式が正しくありません。';
-    }
 }

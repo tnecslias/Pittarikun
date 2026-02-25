@@ -65,17 +65,72 @@
     @csrf
 </form>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
 const paymentMethod = @json($payment_method);
 const paymentError = document.getElementById('paymentError');
 const paymentMessage = document.getElementById('paymentMessage');
+const stripePublishableKey = @json($stripe_publishable_key ?? '');
+const canBypassCardValidation = @json($can_bypass_card_validation ?? false);
+const rawCardNumber = @json($card_number ?? '');
+const rawCardExpiry = @json($card_expiry ?? '');
+const rawCardCvc = @json($card_cvc ?? '');
 
 function submitComplete() {
     document.getElementById('completeForm').submit();
 }
 
+function parseExpiry(value) {
+    const digits = String(value || '').replace(/\D/g, '').slice(0, 4);
+    const month = digits.slice(0, 2);
+    const year = digits.slice(2, 4);
+
+    return {
+        month: month ? Number(month) : 0,
+        year: year ? Number(year) + 2000 : 0,
+    };
+}
+
+async function createStripeToken() {
+    if (canBypassCardValidation) {
+        return null;
+    }
+
+    if (!stripePublishableKey) {
+        throw new Error('STRIPE_PUBLISHABLE_KEY が未設定です。');
+    }
+
+    if (!window.Stripe) {
+        throw new Error('Stripe.js の読み込みに失敗しました。');
+    }
+
+    const stripe = window.Stripe(stripePublishableKey);
+    const cardNumber = String(rawCardNumber || '').replace(/\s+/g, '');
+    const cardCvc = String(rawCardCvc || '').trim();
+    const expiry = parseExpiry(rawCardExpiry);
+
+    if (!cardNumber || !cardCvc || !expiry.month || !expiry.year) {
+        throw new Error('カード情報の形式が正しくありません。');
+    }
+
+    const { token, error } = await stripe.createToken('card', {
+        number: cardNumber,
+        exp_month: expiry.month,
+        exp_year: expiry.year,
+        cvc: cardCvc,
+    });
+
+    if (error) {
+        throw new Error(error.message || 'カード情報のトークン化に失敗しました。');
+    }
+
+    return token?.id || null;
+}
+
 async function chargeStripe() {
     try {
+        const stripeToken = await createStripeToken();
+
         const response = await fetch(@json(route('stripe.charge')), {
             method: 'POST',
             headers: {
@@ -85,9 +140,7 @@ async function chargeStripe() {
             },
             body: JSON.stringify({
                 payment_method: paymentMethod,
-                card_number: @json($card_number),
-                card_expiry: @json($card_expiry),
-                card_cvc: @json($card_cvc),
+                stripe_token: stripeToken,
             }),
         });
 

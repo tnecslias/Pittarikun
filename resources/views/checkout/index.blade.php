@@ -127,6 +127,8 @@
                 <input type="text"
                     name="card_expiry"
                     placeholder="MM/YY"
+                    inputmode="numeric"
+                    maxlength="5"
                     class="w-full border rounded-lg px-3 py-2 text-sm">
             </div>
 
@@ -194,6 +196,20 @@ function toggleCreditCardForm() {
 document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
     radio.addEventListener('change', toggleCreditCardForm);
 });
+
+const cardExpiryInput = document.querySelector('input[name="card_expiry"]');
+if (cardExpiryInput) {
+    cardExpiryInput.addEventListener('input', (event) => {
+        const digits = event.target.value.replace(/\D/g, '').slice(0, 4);
+
+        if (digits.length <= 2) {
+            event.target.value = digits;
+            return;
+        }
+
+        event.target.value = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    });
+}
 
 // 初期表示時
 window.addEventListener('load', toggleCreditCardForm);
