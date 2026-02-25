@@ -65,7 +65,7 @@
     @csrf
 </form>
 
-<script src="https://js.stripe.com/v3/"></script>
+<script src="https://js.stripe.com/v2/"></script>
 <script>
 const paymentMethod = @json($payment_method);
 const paymentError = document.getElementById('paymentError');
@@ -100,11 +100,6 @@ async function createStripeToken() {
         throw new Error('STRIPE_PUBLISHABLE_KEY が未設定です。');
     }
 
-    if (!window.Stripe) {
-        throw new Error('Stripe.js の読み込みに失敗しました。');
-    }
-
-    const stripe = window.Stripe(stripePublishableKey);
     const cardNumber = String(rawCardNumber || '').replace(/\s+/g, '');
     const cardCvc = String(rawCardCvc || '').trim();
     const expiry = parseExpiry(rawCardExpiry);
@@ -113,18 +108,27 @@ async function createStripeToken() {
         throw new Error('カード情報の形式が正しくありません。');
     }
 
-    const { token, error } = await stripe.createToken('card', {
-        number: cardNumber,
-        exp_month: expiry.month,
-        exp_year: expiry.year,
-        cvc: cardCvc,
-    });
-
-    if (error) {
-        throw new Error(error.message || 'カード情報のトークン化に失敗しました。');
+    if (!window.Stripe || !window.Stripe.card) {
+        throw new Error('Stripe.js の読み込みに失敗しました。');
     }
 
-    return token?.id || null;
+    window.Stripe.setPublishableKey(stripePublishableKey);
+
+    return await new Promise((resolve, reject) => {
+        window.Stripe.card.createToken({
+            number: cardNumber,
+            exp_month: expiry.month,
+            exp_year: expiry.year,
+            cvc: cardCvc,
+        }, (status, response) => {
+            if (status !== 200 || !response?.id) {
+                reject(new Error(response?.error?.message || 'カード情報のトークン化に失敗しました。'));
+                return;
+            }
+
+            resolve(response.id);
+        });
+    });
 }
 
 async function chargeStripe() {
