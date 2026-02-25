@@ -22,7 +22,7 @@
 
                 {{-- 画像（正方形 + グラデーション） --}}
                 <div class="w-full aspect-square relative rounded-xl overflow-hidden shadow-sm">
-                    <img src="{{ asset('storage/'.$s->image) }}"
+                    <img src="{{ asset($s->image) }}"
                          alt="{{ $s->name }}"
                          class="object-cover w-full h-full">
 

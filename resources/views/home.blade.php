@@ -170,7 +170,7 @@
 
 
         {{-- 画像 --}}
-        <img src="{{ asset('storage/'.$s->image) }}"
+        <img src="{{ asset($s->image) }}"
              alt="{{ $s->name }}"
              class="object-cover w-full h-full">
 
