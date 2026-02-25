@@ -90,6 +90,21 @@
 </label>
 {{-- クレジットカード入力欄 --}}
 <div id="creditCardForm" class="mt-4 hidden mb-5">
+    @php
+        $stripeSecret = (string) config('services.stripe.secret', '');
+        $isStripeTestMode = str_starts_with($stripeSecret, 'sk_test_');
+        $canBypassAnyCard = (bool) config('services.stripe.allow_any_card', false) && app()->environment(['local', 'testing']);
+    @endphp
+
+    @if (!$canBypassAnyCard && $isStripeTestMode)
+        <p class="mb-3 rounded-lg bg-amber-50 text-amber-800 text-xs px-3 py-2">
+            この環境では任意のカード番号は使えません。Stripeテストカードを使用してください（例: 4242 4242 4242 4242 / 有効期限は未来日 / CVCは任意3桁）。
+        </p>
+    @elseif (!$canBypassAnyCard)
+        <p class="mb-3 rounded-lg bg-gray-50 text-gray-700 text-xs px-3 py-2">
+            この環境では任意のカード番号は使えません。正しいカード情報を入力してください。
+        </p>
+    @endif
 
     <div class="space-y-3">
 

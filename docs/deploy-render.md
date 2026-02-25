@@ -31,6 +31,12 @@ git push
 
 設定後に `Manual Deploy` を実行。
 
+### 検証用途で公開サイトを使う場合（推奨）
+
+- `STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET` は Stripe の **test キー**（`pk_test_...` / `sk_test_...`）を設定する
+- 決済確認は Stripe の **テストカード**を使う（例: `4242 4242 4242 4242`）
+- 公開環境（`APP_ENV=production`）では、ローカル開発用の「任意カード番号を通す」挙動は無効
+
 ## 4. 公開URL
 
 Render の `pittarikun` サービスに表示される `https://...onrender.com` が公開URLです。

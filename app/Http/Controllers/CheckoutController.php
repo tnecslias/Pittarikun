@@ -181,7 +181,7 @@ class CheckoutController extends Controller
             if (!$cardNumber || $expMonth < 1 || $expMonth > 12 || $expYear < (int) date('Y') || !$cardCvc) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'カード情報の形式が正しくありません。',
+                    'message' => $this->invalidCardInputMessage(),
                 ], 422);
             }
 
@@ -230,9 +230,14 @@ class CheckoutController extends Controller
                 'bypassed' => $bypassed,
             ]);
         } catch (\Throwable $e) {
+            $message = $e->getMessage();
+            if ($this->isStripeTestMode() && !$this->canBypassCardValidation()) {
+                $message .= ' テスト環境では Stripe テストカード（例: 4242 4242 4242 4242）を使用してください。';
+            }
+
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => $message,
             ], 422);
         }
     }
@@ -354,5 +359,21 @@ class CheckoutController extends Controller
     {
         return (bool) config('services.stripe.allow_any_card', false)
             && app()->environment(['local', 'testing']);
+    }
+
+    private function isStripeTestMode(): bool
+    {
+        $secret = (string) config('services.stripe.secret', '');
+
+        return str_starts_with($secret, 'sk_test_');
+    }
+
+    private function invalidCardInputMessage(): string
+    {
+        if ($this->isStripeTestMode() && !$this->canBypassCardValidation()) {
+            return 'カード情報の形式が正しくありません。テスト環境では Stripe テストカード（例: 4242 4242 4242 4242）を使用してください。';
+        }
+
+        return 'カード情報の形式が正しくありません。';
     }
 }
