@@ -118,6 +118,7 @@ class CheckoutController extends Controller
             'card_cvc'                    => $data['card_cvc'] ?? '',
             'stripe_publishable_key'      => (string) config('services.stripe.publishable_key', ''),
             'can_bypass_card_validation'  => $this->canBypassCardValidation(),
+            'stripe_billing_name'         => $data['name'] ?? '',
         ]);
     }
 
@@ -128,8 +129,8 @@ class CheckoutController extends Controller
     public function stripeCharge(Request $request)
     {
         $request->validate([
-            'payment_method' => 'required|string',
-            'stripe_token'   => 'nullable|string',
+            'payment_method'            => 'required|string',
+            'stripe_payment_method_id'  => 'nullable|string',
         ]);
 
         if ($request->payment_method !== 'credit_card') {
@@ -169,13 +170,15 @@ class CheckoutController extends Controller
             // 開発モードでは入力値を無視し、Stripe提供のテストPaymentMethodを使用
             $intentPayload['payment_method'] = 'pm_card_visa';
         } else {
-            $stripeToken = trim((string) $request->input('stripe_token', ''));
-            if ($stripeToken === '') {
+            $stripePaymentMethodId = trim((string) $request->input('stripe_payment_method_id', ''));
+            if ($stripePaymentMethodId === '') {
                 return response()->json([
                     'success' => false,
                     'message' => 'カード情報の送信に失敗しました。もう一度お試しください。',
                 ], 422);
             }
+
+            $intentPayload['payment_method'] = $stripePaymentMethodId;
         }
 
         $secret = (string) config('services.stripe.secret');
@@ -188,20 +191,6 @@ class CheckoutController extends Controller
 
         try {
             $stripe = new StripeClient($secret);
-
-            if (!$this->canBypassCardValidation()) {
-                $paymentMethod = $stripe->paymentMethods->create([
-                    'type' => 'card',
-                    'card' => [
-                        'token' => $stripeToken,
-                    ],
-                    'billing_details' => [
-                        'name' => $checkout['name'],
-                    ],
-                ]);
-
-                $intentPayload['payment_method'] = $paymentMethod->id;
-            }
 
             $intent = $stripe->paymentIntents->create($intentPayload, [
                 'idempotency_key' => Session::get('stripe_idempotency_key') ?? (string) Str::uuid(),

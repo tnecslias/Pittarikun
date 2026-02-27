@@ -61,80 +61,103 @@
 
 </div>
 
+@if ($payment_method === 'credit_card' && !($can_bypass_card_validation ?? false))
+<div id="stripeCardSection" class="w-full max-w-lg mx-auto mt-4 bg-white p-4 sm:p-6 rounded-xl shadow">
+    <p class="text-sm text-gray-700 mb-3">
+        セキュリティのため、カード情報はこの画面で再入力してください。
+    </p>
+    <div id="stripeCardElement" class="border rounded-lg px-3 py-3"></div>
+    <p id="stripeCardElementError" class="text-red-600 text-sm mt-3 hidden"></p>
+    <button type="button" id="stripePayButton"
+        class="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg disabled:opacity-60">
+        カード情報を送信して決済する
+    </button>
+</div>
+@endif
+
 <form id="completeForm" method="POST" action="{{ route('checkout.complete') }}">
     @csrf
 </form>
 
-<script src="https://js.stripe.com/v2/"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <script>
 const paymentMethod = @json($payment_method);
 const paymentError = document.getElementById('paymentError');
 const paymentMessage = document.getElementById('paymentMessage');
 const stripePublishableKey = @json($stripe_publishable_key ?? '');
 const canBypassCardValidation = @json($can_bypass_card_validation ?? false);
-const rawCardNumber = @json($card_number ?? '');
-const rawCardExpiry = @json($card_expiry ?? '');
-const rawCardCvc = @json($card_cvc ?? '');
+const stripeBillingName = @json($stripe_billing_name ?? '');
+const stripeCardElementError = document.getElementById('stripeCardElementError');
+const stripePayButton = document.getElementById('stripePayButton');
+let stripe = null;
+let elements = null;
+let cardElement = null;
 
 function submitComplete() {
     document.getElementById('completeForm').submit();
 }
 
-function parseExpiry(value) {
-    const digits = String(value || '').replace(/\D/g, '').slice(0, 4);
-    const month = digits.slice(0, 2);
-    const year = digits.slice(2, 4);
-
-    return {
-        month: month ? Number(month) : 0,
-        year: year ? Number(year) + 2000 : 0,
-    };
+function setInlineCardError(message = '') {
+    if (!stripeCardElementError) return;
+    if (!message) {
+        stripeCardElementError.textContent = '';
+        stripeCardElementError.classList.add('hidden');
+        return;
+    }
+    stripeCardElementError.textContent = message;
+    stripeCardElementError.classList.remove('hidden');
 }
 
-async function createStripeToken() {
-    if (canBypassCardValidation) {
-        return null;
+function initStripeElements() {
+    if (canBypassCardValidation || paymentMethod !== 'credit_card') {
+        return;
     }
 
     if (!stripePublishableKey) {
         throw new Error('STRIPE_PUBLISHABLE_KEY が未設定です。');
     }
 
-    const cardNumber = String(rawCardNumber || '').replace(/\s+/g, '');
-    const cardCvc = String(rawCardCvc || '').trim();
-    const expiry = parseExpiry(rawCardExpiry);
-
-    if (!cardNumber || !cardCvc || !expiry.month || !expiry.year) {
-        throw new Error('カード情報の形式が正しくありません。');
-    }
-
-    if (!window.Stripe || !window.Stripe.card) {
+    if (!window.Stripe) {
         throw new Error('Stripe.js の読み込みに失敗しました。');
     }
 
-    window.Stripe.setPublishableKey(stripePublishableKey);
+    if (stripe && cardElement) {
+        return;
+    }
 
-    return await new Promise((resolve, reject) => {
-        window.Stripe.card.createToken({
-            number: cardNumber,
-            exp_month: expiry.month,
-            exp_year: expiry.year,
-            cvc: cardCvc,
-        }, (status, response) => {
-            if (status !== 200 || !response?.id) {
-                reject(new Error(response?.error?.message || 'カード情報のトークン化に失敗しました。'));
-                return;
-            }
-
-            resolve(response.id);
-        });
+    stripe = window.Stripe(stripePublishableKey);
+    elements = stripe.elements();
+    cardElement = elements.create('card', {
+        hidePostalCode: true,
+    });
+    cardElement.mount('#stripeCardElement');
+    cardElement.on('change', (event) => {
+        setInlineCardError(event.error ? event.error.message : '');
     });
 }
 
-async function chargeStripe() {
-    try {
-        const stripeToken = await createStripeToken();
+async function createStripePaymentMethodId() {
+    if (canBypassCardValidation) {
+        return null;
+    }
 
+    initStripeElements();
+
+    const { paymentMethod: createdPaymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: stripeBillingName ? { name: stripeBillingName } : undefined,
+    });
+
+    if (error) {
+        throw new Error(error.message || 'カード情報の送信に失敗しました。');
+    }
+
+    return createdPaymentMethod?.id || null;
+}
+
+async function chargeStripe(stripePaymentMethodId = null) {
+    try {
         const response = await fetch(@json(route('stripe.charge')), {
             method: 'POST',
             headers: {
@@ -144,7 +167,7 @@ async function chargeStripe() {
             },
             body: JSON.stringify({
                 payment_method: paymentMethod,
-                stripe_token: stripeToken,
+                stripe_payment_method_id: stripePaymentMethodId,
             }),
         });
 
@@ -163,11 +186,42 @@ async function chargeStripe() {
         paymentError.textContent = error.message;
         paymentError.classList.remove('hidden');
         paymentMessage.textContent = 'カード決済に失敗しました。内容を確認してください。';
+        throw error;
     }
 }
 
 if (paymentMethod === 'credit_card') {
-    chargeStripe();
+    if (canBypassCardValidation) {
+        chargeStripe().catch(() => {});
+    } else {
+        try {
+            initStripeElements();
+            paymentMessage.textContent = 'カード情報を入力して決済を実行してください。';
+        } catch (error) {
+            paymentError.textContent = error.message;
+            paymentError.classList.remove('hidden');
+            paymentMessage.textContent = 'カード決済の準備に失敗しました。';
+        }
+
+        if (stripePayButton) {
+            stripePayButton.addEventListener('click', async () => {
+                stripePayButton.disabled = true;
+                setInlineCardError('');
+                paymentError.classList.add('hidden');
+                paymentMessage.textContent = 'カード会社に接続しています...';
+
+                try {
+                    const stripePaymentMethodId = await createStripePaymentMethodId();
+                    await chargeStripe(stripePaymentMethodId);
+                } catch (error) {
+                    paymentError.textContent = error.message;
+                    paymentError.classList.remove('hidden');
+                    paymentMessage.textContent = 'カード決済に失敗しました。内容を確認してください。';
+                    stripePayButton.disabled = false;
+                }
+            });
+        }
+    }
 } else {
     setTimeout(submitComplete, 1200);
 }
