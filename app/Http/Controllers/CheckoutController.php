@@ -56,9 +56,6 @@ class CheckoutController extends Controller
                 'address'        => 'required',
                 'phone'          => 'required',
                 'payment_method' => 'required',
-                'card_number'    => 'nullable|string',
-                'card_expiry'    => 'nullable|string',
-                'card_cvc'       => 'nullable|string',
             ]);
 
             // セッション保存
@@ -76,9 +73,6 @@ class CheckoutController extends Controller
             'address'        => $checkout['address'],
             'phone'          => $checkout['phone'],
             'payment_method' => $checkout['payment_method'],
-            'card_number'    => $checkout['card_number'] ?? '',
-            'card_expiry'    => $checkout['card_expiry'] ?? '',
-            'card_cvc'       => $checkout['card_cvc'] ?? '',
             'cart_items'     => CartItem::where('user_id', Auth::id())
                                 ->with('storage')
                                 ->get(),
@@ -96,9 +90,6 @@ class CheckoutController extends Controller
             'address'        => 'required',
             'phone'          => 'required',
             'payment_method' => 'required',
-            'card_number'    => 'nullable|string',
-            'card_expiry'    => 'nullable|string',
-            'card_cvc'       => 'nullable|string',
         ]);
 
         Session::put('checkout', $data);
@@ -113,9 +104,6 @@ class CheckoutController extends Controller
 
         return view('checkout.payment', [
             'payment_method'              => $data['payment_method'],
-            'card_number'                 => $data['card_number'] ?? '',
-            'card_expiry'                 => $data['card_expiry'] ?? '',
-            'card_cvc'                    => $data['card_cvc'] ?? '',
             'stripe_publishable_key'      => (string) config('services.stripe.publishable_key', ''),
             'can_bypass_card_validation'  => $this->canBypassCardValidation(),
             'stripe_billing_name'         => $data['name'] ?? '',
