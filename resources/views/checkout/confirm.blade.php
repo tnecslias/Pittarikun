@@ -120,7 +120,11 @@
 
 @if ($payment_method === 'credit_card')
     <p class="mt-2 text-sm text-gray-500">
-        カード情報は次の画面で安全に入力します。
+        @if (app()->environment('production'))
+            本番環境ではそのまま注文を確定します。
+        @else
+            カード情報は次の画面で安全に入力します。
+        @endif
     </p>
 @endif
 

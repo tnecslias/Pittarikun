@@ -35,7 +35,11 @@
         @switch($payment_method)
 
             @case('credit_card')
-                カード会社に接続しています...
+                @if ($skip_stripe_payment ?? false)
+                    注文内容を確認しています...
+                @else
+                    カード会社に接続しています...
+                @endif
                 @break
 
             @case('cash')
@@ -61,7 +65,7 @@
 
 </div>
 
-@if ($payment_method === 'credit_card' && !($can_bypass_card_validation ?? false))
+@if ($payment_method === 'credit_card' && !($can_bypass_card_validation ?? false) && !($skip_stripe_payment ?? false))
 <div id="stripeCardSection" class="w-full max-w-lg mx-auto mt-4 bg-white p-4 sm:p-6 rounded-xl shadow">
     <p class="text-sm text-gray-700 mb-3">
         セキュリティのため、カード情報はこの画面で再入力してください。
@@ -79,13 +83,16 @@
     @csrf
 </form>
 
+@if ($payment_method === 'credit_card' && !($can_bypass_card_validation ?? false) && !($skip_stripe_payment ?? false))
 <script src="https://js.stripe.com/v3/"></script>
+@endif
 <script>
 const paymentMethod = @json($payment_method);
 const paymentError = document.getElementById('paymentError');
 const paymentMessage = document.getElementById('paymentMessage');
 const stripePublishableKey = @json($stripe_publishable_key ?? '');
 const canBypassCardValidation = @json($can_bypass_card_validation ?? false);
+const skipStripePayment = @json($skip_stripe_payment ?? false);
 const stripeBillingName = @json($stripe_billing_name ?? '');
 const stripeCardElementError = document.getElementById('stripeCardElementError');
 const stripePayButton = document.getElementById('stripePayButton');
@@ -177,7 +184,9 @@ async function chargeStripe(stripePaymentMethodId = null) {
             throw new Error(result.message || '決済に失敗しました。');
         }
 
-        if (result.bypassed) {
+        if (result.skipped) {
+            paymentMessage.textContent = '注文内容を確認して確定します...';
+        } else if (result.bypassed) {
             paymentMessage.textContent = '開発モード: 決済をスキップして注文を確定します...';
         }
 
@@ -191,7 +200,10 @@ async function chargeStripe(stripePaymentMethodId = null) {
 }
 
 if (paymentMethod === 'credit_card') {
-    if (canBypassCardValidation) {
+    if (skipStripePayment) {
+        paymentMessage.textContent = '注文内容を確認して確定します...';
+        setTimeout(submitComplete, 1200);
+    } else if (canBypassCardValidation) {
         chargeStripe().catch(() => {});
     } else {
         try {

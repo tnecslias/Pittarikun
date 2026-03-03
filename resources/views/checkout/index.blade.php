@@ -95,7 +95,11 @@
         $canBypassAnyCard = (bool) config('services.stripe.allow_any_card', false) && app()->environment(['local', 'testing']);
     @endphp
 
-    @if (!$canBypassAnyCard && $isStripeTestMode)
+    @if (app()->environment('production'))
+        <p class="mb-3 rounded-lg bg-gray-50 text-gray-700 text-xs px-3 py-2">
+            本番環境ではクレジットカードも他の支払い方法と同様に、次の画面でそのまま注文を確定します。
+        </p>
+    @elseif (!$canBypassAnyCard && $isStripeTestMode)
         <p class="mb-3 rounded-lg bg-amber-50 text-amber-800 text-xs px-3 py-2">
             カード情報は次の画面で入力します。この環境では Stripe テストカードを使用してください（例: 4242 4242 4242 4242）。
         </p>

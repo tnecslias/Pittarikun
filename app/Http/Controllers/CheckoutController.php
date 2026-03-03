@@ -95,7 +95,7 @@ class CheckoutController extends Controller
         Session::put('checkout', $data);
         Session::forget(['stripe_paid', 'stripe_payment_intent_id']);
 
-        if ($data['payment_method'] === 'credit_card') {
+        if ($data['payment_method'] === 'credit_card' && !$this->shouldSkipStripePayment()) {
             // 同一注文の重複課金を防ぐため、画面遷移ごとに1つのキーを払い出す
             Session::put('stripe_idempotency_key', (string) Str::uuid());
         } else {
@@ -106,6 +106,7 @@ class CheckoutController extends Controller
             'payment_method'              => $data['payment_method'],
             'stripe_publishable_key'      => (string) config('services.stripe.publishable_key', ''),
             'can_bypass_card_validation'  => $this->canBypassCardValidation(),
+            'skip_stripe_payment'         => $this->shouldSkipStripePayment(),
             'stripe_billing_name'         => $data['name'] ?? '',
         ]);
     }
@@ -123,6 +124,16 @@ class CheckoutController extends Controller
 
         if ($request->payment_method !== 'credit_card') {
             return response()->json(['success' => true]);
+        }
+
+        if ($this->shouldSkipStripePayment()) {
+            Session::put('stripe_paid', true);
+            Session::put('stripe_payment_intent_id', 'skipped-production');
+
+            return response()->json([
+                'success' => true,
+                'skipped' => true,
+            ]);
         }
 
         if (Session::get('stripe_paid') && Session::get('stripe_payment_intent_id')) {
@@ -329,6 +340,11 @@ class CheckoutController extends Controller
     {
         return (bool) config('services.stripe.allow_any_card', false)
             && app()->environment(['local', 'testing']);
+    }
+
+    private function shouldSkipStripePayment(): bool
+    {
+        return app()->environment('production');
     }
 
     private function isStripeTestMode(): bool
