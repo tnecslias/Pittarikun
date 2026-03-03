@@ -95,19 +95,54 @@
         $canBypassAnyCard = (bool) config('services.stripe.allow_any_card', false) && app()->environment(['local', 'testing']);
     @endphp
 
-    @if (app()->environment('production'))
-        <p class="mb-3 rounded-lg bg-gray-50 text-gray-700 text-xs px-3 py-2">
-            本番環境ではクレジットカードも他の支払い方法と同様に、次の画面でそのまま注文を確定します。
-        </p>
-    @elseif (!$canBypassAnyCard && $isStripeTestMode)
+    @if (!$canBypassAnyCard && $isStripeTestMode)
         <p class="mb-3 rounded-lg bg-amber-50 text-amber-800 text-xs px-3 py-2">
-            カード情報は次の画面で入力します。この環境では Stripe テストカードを使用してください（例: 4242 4242 4242 4242）。
+            この環境では Stripe テストカードを使用してください（例: 4242 4242 4242 4242 / 有効期限は未来日 / CVCは任意3桁）。
         </p>
     @elseif (!$canBypassAnyCard)
         <p class="mb-3 rounded-lg bg-gray-50 text-gray-700 text-xs px-3 py-2">
-            カード情報は次の画面で安全に入力します。
+            カード情報を入力してください。
         </p>
     @endif
+
+    <div class="space-y-3">
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">
+                カード番号
+            </label>
+            <input type="text"
+                name="card_number"
+                value="{{ old('card_number') }}"
+                placeholder="4242 4242 4242 4242"
+                class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+
+        <div class="flex gap-3">
+            <div class="flex-1">
+                <label class="block text-xs text-gray-600 mb-1">
+                    有効期限
+                </label>
+                <input type="text"
+                    name="card_expiry"
+                    value="{{ old('card_expiry') }}"
+                    placeholder="MM/YY"
+                    inputmode="numeric"
+                    maxlength="5"
+                    class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+
+            <div class="flex-1">
+                <label class="block text-xs text-gray-600 mb-1">
+                    CVC
+                </label>
+                <input type="text"
+                    name="card_cvc"
+                    value="{{ old('card_cvc') }}"
+                    placeholder="123"
+                    class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -158,6 +193,20 @@ function toggleCreditCardForm() {
 document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
     radio.addEventListener('change', toggleCreditCardForm);
 });
+
+const cardExpiryInput = document.querySelector('input[name="card_expiry"]');
+if (cardExpiryInput) {
+    cardExpiryInput.addEventListener('input', (event) => {
+        const digits = event.target.value.replace(/\D/g, '').slice(0, 4);
+
+        if (digits.length <= 2) {
+            event.target.value = digits;
+            return;
+        }
+
+        event.target.value = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    });
+}
 
 // 初期表示時
 window.addEventListener('load', toggleCreditCardForm);

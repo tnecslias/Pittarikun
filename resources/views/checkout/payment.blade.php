@@ -35,11 +35,7 @@
         @switch($payment_method)
 
             @case('credit_card')
-                @if ($skip_stripe_payment ?? false)
-                    注文内容を確認しています...
-                @else
-                    カード会社に接続しています...
-                @endif
+                カード会社に接続しています...
                 @break
 
             @case('cash')
@@ -184,9 +180,7 @@ async function chargeStripe(stripePaymentMethodId = null) {
             throw new Error(result.message || '決済に失敗しました。');
         }
 
-        if (result.skipped) {
-            paymentMessage.textContent = '注文内容を確認して確定します...';
-        } else if (result.bypassed) {
+        if (result.bypassed) {
             paymentMessage.textContent = '開発モード: 決済をスキップして注文を確定します...';
         }
 
@@ -201,7 +195,6 @@ async function chargeStripe(stripePaymentMethodId = null) {
 
 if (paymentMethod === 'credit_card') {
     if (skipStripePayment) {
-        paymentMessage.textContent = '注文内容を確認して確定します...';
         setTimeout(submitComplete, 1200);
     } else if (canBypassCardValidation) {
         chargeStripe().catch(() => {});

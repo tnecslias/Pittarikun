@@ -19,6 +19,9 @@
         <input type="hidden" name="address" value="{{ $address }}">
         <input type="hidden" name="phone" value="{{ $phone }}">
         <input type="hidden" name="payment_method" value="{{ $payment_method }}">
+        <input type="hidden" name="card_number" value="{{ $card_number }}">
+        <input type="hidden" name="card_expiry" value="{{ $card_expiry }}">
+        <input type="hidden" name="card_cvc" value="{{ $card_cvc }}">
 
         {{-- 購入者情報 --}}
         <div class="space-y-3 text-sm">
@@ -120,11 +123,7 @@
 
 @if ($payment_method === 'credit_card')
     <p class="mt-2 text-sm text-gray-500">
-        @if (app()->environment('production'))
-            本番環境ではそのまま注文を確定します。
-        @else
-            カード情報は次の画面で安全に入力します。
-        @endif
+        入力内容を確認後、決済処理へ進みます。
     </p>
 @endif
 
