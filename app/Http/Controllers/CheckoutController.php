@@ -104,7 +104,11 @@ class CheckoutController extends Controller
         Session::put('checkout', $data);
         Session::forget(['stripe_paid', 'stripe_payment_intent_id']);
 
-        if ($data['payment_method'] === 'credit_card' && !$this->shouldSkipStripePayment()) {
+        if ($data['payment_method'] === 'credit_card' && $this->shouldSkipStripePayment()) {
+            Session::put('stripe_paid', true);
+            Session::put('stripe_payment_intent_id', 'skipped-production');
+            Session::forget('stripe_idempotency_key');
+        } elseif ($data['payment_method'] === 'credit_card' && !$this->shouldSkipStripePayment()) {
             // 同一注文の重複課金を防ぐため、画面遷移ごとに1つのキーを払い出す
             Session::put('stripe_idempotency_key', (string) Str::uuid());
         } else {
